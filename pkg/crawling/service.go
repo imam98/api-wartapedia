@@ -8,7 +8,7 @@ type NewsFetcher interface {
 
 type crawling struct {
 	repo news.Repository
-	nf NewsFetcher
+	nf   NewsFetcher
 }
 
 func NewCrawler(repo news.Repository, fetcher NewsFetcher) *crawling {

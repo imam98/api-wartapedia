@@ -6,7 +6,7 @@ type NewsFetcher interface {
 	Fetch(url string) ([]*news.News, error)
 }
 
-type listing struct{
+type listing struct {
 	nf NewsFetcher
 }
 
