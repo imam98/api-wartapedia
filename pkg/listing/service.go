@@ -3,7 +3,7 @@ package listing
 import "github.com/imam98/api-wartapedia/pkg/news"
 
 type NewsFetcher interface {
-	Fetch(url string) ([]*news.News, error)
+	Fetch(url string) ([]news.News, error)
 }
 
 type listing struct {
@@ -16,7 +16,7 @@ func NewService(fetcher NewsFetcher) news.ListerService {
 	}
 }
 
-func (l *listing) GetNews(url string) ([]*news.News, error) {
+func (l *listing) GetNews(url string) ([]news.News, error) {
 	data, err := l.nf.Fetch(url)
 	if err != nil {
 		return nil, err

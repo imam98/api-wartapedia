@@ -1,7 +1,7 @@
 package news_fetcher
 
 import (
-	"encoding/json"
+	"encoding/xml"
 	"github.com/imam98/api-wartapedia/pkg/news"
 	"net/http"
 )
@@ -9,14 +9,14 @@ import (
 type fetcher struct{}
 
 type newsResults struct {
-	n []*news.News
+	n []news.News `xml:"item"`
 }
 
 func NewFetcher() *fetcher {
 	return &fetcher{}
 }
 
-func (f *fetcher) Fetch(url string) ([]*news.News, error) {
+func (f *fetcher) Fetch(url string) ([]news.News, error) {
 	client := &http.Client{}
 
 	request, err := http.NewRequest("GET", url, nil)
@@ -31,7 +31,7 @@ func (f *fetcher) Fetch(url string) ([]*news.News, error) {
 	defer response.Body.Close()
 
 	var data newsResults
-	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
+	if err := xml.NewDecoder(response.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 

@@ -3,7 +3,7 @@ package crawling
 import "github.com/imam98/api-wartapedia/pkg/news"
 
 type NewsFetcher interface {
-	Fetch(url string) ([]*news.News, error)
+	Fetch(url string) ([]news.News, error)
 }
 
 type crawling struct {
@@ -25,6 +25,10 @@ func (c *crawling) Crawl(url string) error {
 	}
 
 	for _, val := range data {
+		if _, err := c.repo.Find(val.ID); err == nil {
+			break
+		}
+
 		if err := c.repo.Store(val); err != nil {
 			return err
 		}
