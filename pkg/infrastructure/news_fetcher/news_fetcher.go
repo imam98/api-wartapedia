@@ -9,7 +9,7 @@ import (
 type fetcher struct{}
 
 type newsResults struct {
-	n []news.News `xml:"item"`
+	n []news.News `xml:"channel>item"`
 }
 
 func NewFetcher() *fetcher {
