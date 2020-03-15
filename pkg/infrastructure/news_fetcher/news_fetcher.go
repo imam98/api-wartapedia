@@ -9,7 +9,8 @@ import (
 type fetcher struct{}
 
 type newsResults struct {
-	n []news.News `xml:"channel>item"`
+	XMLName xml.Name    `xml:"rss"`
+	N       []news.News `xml:"channel>item"`
 }
 
 func NewFetcher() *fetcher {
@@ -35,5 +36,5 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 		return nil, err
 	}
 
-	return data.n, nil
+	return data.N, nil
 }

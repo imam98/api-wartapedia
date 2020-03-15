@@ -1,11 +1,18 @@
 package news
 
+import "encoding/xml"
+
 type News struct {
-	ID           string `xml:",omitempty"`
-	Source       string `xml:",omitempty"`
-	Title        string `xml:"title,chardata"`
-	MediaContent string `xml:",omitempty"`
-	Url          string `xml:"link"`
-	Description  string `xml:"description,chardata"`
-	PubDate      string `xml:"pubDate"`
+	ID           string      `xml:"-"`
+	Source       string      `xml:"-"`
+	Title        string      `xml:"title"`
+	MediaContent string      `xml:",omitempty"`
+	Url          string      `xml:"link"`
+	Description  Description `xml:"description"`
+	PubDate      string      `xml:"pubDate"`
+}
+
+type Description struct {
+	XMLName xml.Name `xml:"description"`
+	Text    string   `xml:",cdata"`
 }
