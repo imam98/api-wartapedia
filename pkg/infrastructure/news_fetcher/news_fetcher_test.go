@@ -98,6 +98,36 @@ func fakeBBCServer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, responseXML)
 }
 
+func fakeDetikServer(w http.ResponseWriter, r *http.Request) {
+	responseXML := `
+	<?xml version="1.0" encoding="UTF-8"?>
+	<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+			<title>news.detik</title>
+			<link>http://news.detik.com/</link>
+			<description>Detik.com sindikasi</description>
+			<image>
+				<title>detikNews - Berita</title>
+				<link>http://news.detik.com/</link>
+				<url>http://rss.detik.com/images/rsslogo_detikcom.gif</url>
+			</image>
+			<item>
+				<title><![CDATA[Dummy Title]]></title>
+				<link>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</link>
+				<guid>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</guid>
+				<pubDate>Sun, 15 Mar 2020 18:34:46 +0700</pubDate>
+				<description><img src="https://dummy.png" align="left" hspace="7" width="100" /><![CDATA["Dummy description"]]></description>
+				<enclosure url="https://dummy.png" length="10240" type="image/png" />
+			</item>
+		</channel>
+	</rss>
+	`
+
+	w.Header().Set("content-type", "image/svg+xml")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, responseXML)
+}
+
 func TestBBCNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeBBCServer))
 	defer server.Close()
@@ -168,6 +198,30 @@ func TestAntaraNewsFetcher(t *testing.T) {
 	assertElements(t, expectedResult, data)
 }
 
+func TestDetikNewsFetcher(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(fakeDetikServer))
+	defer server.Close()
+
+	expectedResult := []news.News{
+		news.News{
+			Title:       "Dummy Title",
+			Url:         "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
+			MediaContent: news.Media{Src: "https://dummy.png"},
+			Description: news.Description{Text: "\"Dummy description\""},
+			PubDate:     "Sun, 15 Mar 2020 18:34:46 +0700",
+		},
+	}
+
+	fetcher := NewFetcher()
+	data, err := fetcher.Fetch(server.URL)
+	if err != nil {
+		t.Fatalf("Error occured: %q", err)
+	}
+
+	assertLength(t, expectedResult, data)
+	assertElements(t, expectedResult, data)
+}
+
 func assertLength(t *testing.T, expected []news.News, got []news.News) {
 	t.Helper()
 
@@ -180,6 +234,10 @@ func assertElements(t *testing.T, expected []news.News, got []news.News) {
 	for index, val := range expected {
 		if val.Title != got[index].Title {
 			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Title, got[index].Title)
+		}
+
+		if val.MediaContent.Src != got[index].MediaContent.Src {
+			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.MediaContent.Src, got[index].MediaContent.Src)
 		}
 
 		if val.Description.Text != got[index].Description.Text {
