@@ -6,12 +6,17 @@ type NewsFetcher interface {
 	Fetch(url string) ([]news.News, error)
 }
 
+type Repository interface {
+	Find(key string) (news.News, error)
+	Store(news news.News) error
+}
+
 type crawling struct {
-	repo news.Repository
+	repo Repository
 	nf   NewsFetcher
 }
 
-func NewCrawler(repo news.Repository, fetcher NewsFetcher) *crawling {
+func NewCrawler(repo Repository, fetcher NewsFetcher) *crawling {
 	return &crawling{
 		repo: repo,
 		nf:   fetcher,

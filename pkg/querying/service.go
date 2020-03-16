@@ -2,11 +2,15 @@ package querying
 
 import "github.com/imam98/api-wartapedia/pkg/news"
 
-type querying struct {
-	repo news.Repository
+type Repository interface {
+	FindByQuery(query string) ([]news.News, error)
 }
 
-func NewService(repo news.Repository) *querying {
+type querying struct {
+	repo Repository
+}
+
+func NewService(repo Repository) *querying {
 	return &querying{
 		repo: repo,
 	}
