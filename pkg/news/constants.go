@@ -3,7 +3,7 @@ package news
 import "errors"
 
 const (
-	ANTARANEWS = iota
+	ANTARANEWS = iota + 1
 	BBC
 	DETIK
 	OKEZONE
@@ -37,3 +37,7 @@ var (
 	ErrItemNotFound  = errors.New("Error item not found")
 	ErrItemDuplicate = errors.New("Error item already exists")
 )
+
+func (s SourceFlag) SourceOnly() SourceFlag {
+	return s & SourceFlag(15)
+}
