@@ -167,6 +167,62 @@ func fakeOkezoneServer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, responseXML)
 }
 
+func fakeRepublikaServer(w http.ResponseWriter, r *http.Request) {
+	responseXML := `
+	<?xml version="1.0" encoding="UTF-8"?>
+	<rss version="2.0"
+		xmlns:content="http://purl.org/rss/1.0/modules/content/"
+		xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+		xmlns:dc="http://purl.org/dc/elements/1.1/"
+		xmlns:atom="http://www.w3.org/2005/Atom"
+		xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+		xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+		xmlns:georss="http://www.georss.org/georss"
+		xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+		xmlns:media="http://search.yahoo.com/mrss/">
+		<channel>
+			<title>Republika Online - Nasional RSS Feed</title>
+			<atom:link href="https://republika.co.id/rss/nasional" rel="self" type="application/rss+xml"/>
+			<link>http://www.republika.co.id</link>
+			<description></description>
+			<lastBuildDate>Mon, 16 Mar 2020 14:29:53 +0700</lastBuildDate>
+			<generator>http://www.republika.co.id/</generator>
+			<language>id</language>
+			<sy:updatePeriod>hourly</sy:updatePeriod>
+			<sy:updateFrequency>1</sy:updateFrequency>
+			<image>
+				<url>https://static.republika.co.id/files/images/logo.png</url>
+				<title>Republika Online - Nasional RSS Feed</title>
+				<link>https://www.republika.co.id</link>
+			</image>
+			<item>
+				<title>Dummy Title</title>
+				<link>https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi</link>
+				<comments>https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi</comments>
+				<pubDate>Mon, 16 Mar 2020 14:29:53 +0700</pubDate>
+				<dc:creator>Bayu Hermawan</dc:creator>
+				<category>
+					<![CDATA[Politik]]>
+				</category>
+				<media:content url="https://dummy.jpg" >
+					<media:credit>Ist</media:credit>
+					<media:title>Politikus PAN Tjatur Sapto Edy(Ist)</media:title>
+				</media:content>
+				<guid isPermaLink="false">https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi</guid>
+				<description><![CDATA[Dummy description]]></description>
+				<content:encoded>
+					<![CDATA[Dummy description]]>
+				</content:encoded>
+			</item>
+		</channel>
+	</rss>
+	`
+
+	w.Header().Set("content-type", "image/svg+xml")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, responseXML)
+}
+
 func TestBBCNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeBBCServer))
 	defer server.Close()
@@ -272,6 +328,30 @@ func TestOkezoneNewsFetcher(t *testing.T) {
 			MediaContent: news.Media{Src: "https://dummy.jpg?w=300"},
 			Description:  news.Description{Text: "Dummy description"},
 			PubDate:      "Mon, 16 Mar 2020 13:53:18 +0700",
+		},
+	}
+
+	fetcher := NewFetcher()
+	data, err := fetcher.Fetch(server.URL)
+	if err != nil {
+		t.Fatalf("Error occured: %q", err)
+	}
+
+	assertLength(t, expectedResult, data)
+	assertElements(t, expectedResult, data)
+}
+
+func TestRepublikaNewsFetcher(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(fakeRepublikaServer))
+	defer server.Close()
+
+	expectedResult := []news.News{
+		news.News{
+			Title:        "Dummy Title",
+			Url:          "https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi",
+			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Mon, 16 Mar 2020 14:29:53 +0700",
 		},
 	}
 
