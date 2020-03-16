@@ -16,7 +16,9 @@ const (
 	CAT_TEKNO    = 48
 )
 
-var Sources = map[byte]string{
+type SourceFlag byte
+
+var Sources = map[SourceFlag]string{
 	CAT_NASIONAL | ANTARANEWS: "https://www.antaranews.com/rss/terkini",
 	CAT_NASIONAL | BBC:        "http://feeds.bbci.co.uk/indonesia/rss.xml",
 	CAT_NASIONAL | DETIK:      "http://rss.detik.com/index.php/detiknews",

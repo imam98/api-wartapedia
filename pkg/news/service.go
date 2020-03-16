@@ -1,7 +1,7 @@
 package news
 
 type ListerService interface {
-	GetNews(url string) ([]News, error)
+	GetNews(flags SourceFlag) ([]News, error)
 }
 
 type QueryService interface {
@@ -9,5 +9,5 @@ type QueryService interface {
 }
 
 type CrawlerService interface {
-	Crawl(url string) error
+	Crawl(flags SourceFlag) error
 }
