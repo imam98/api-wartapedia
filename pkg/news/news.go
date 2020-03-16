@@ -6,7 +6,8 @@ type News struct {
 	ID           string      `xml:"-"`
 	Source       string      `xml:"-"`
 	Title        string      `xml:"title"`
-	MediaContent Media       `xml:"enclosure,omitempty"`
+	Enclosure    Media       `xml:"enclosure,omitempty"`
+	MediaContent Media       `xml:"content,omitempty"`
 	Url          string      `xml:"link"`
 	Description  Description `xml:"description"`
 	PubDate      string      `xml:"pubDate"`
@@ -18,6 +19,5 @@ type Description struct {
 }
 
 type Media struct {
-	XMLName xml.Name `xml:"enclosure"`
-	Src     string   `xml:"url,attr"`
+	Src string `xml:"url,attr"`
 }

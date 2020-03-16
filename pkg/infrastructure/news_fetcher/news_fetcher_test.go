@@ -128,6 +128,45 @@ func fakeDetikServer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, responseXML)
 }
 
+func fakeOkezoneServer(w http.ResponseWriter, r *http.Request) {
+	responseXML := `
+	<?xml version="1.0" encoding="UTF-8"?>
+	<rss version="2.0"
+		xmlns:content="http://purl.org/rss/1.0/modules/content/"
+		xmlns:media="http://search.yahoo.com/mrss/"
+		xmlns:atom="http://www.w3.org/2005/Atom">
+		<channel>
+			<title>Sindikasi news.okezone.com</title>
+			<description>Berita-berita Okezone pada kanal News</description>
+			<link>https://news.okezone.com</link>
+			<lastBuildDate>Mon, 16 Mar 2020 13:53:26 +0700</lastBuildDate>
+			<generator>Okezone RSS 2.0 Generator</generator>
+			<image>
+				<link>https://news.okezone.com</link>
+				<title>Sindikasi news.okezone.com</title>
+				<url>https://cdn.okezone.com/underwood/revamp/2019/logo/desktop/icon-okz.png</url>
+				<description>Berita-berita Okezone pada kanal News</description>
+			</image>
+			<item>
+				<title>Dummy Title</title>
+				<link>https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik</link>
+				<guid>https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik</guid>
+				<description>Dummy description</description>
+				<media:content url="https://dummy.jpg?w=300" 
+										type="image/jpg" expression="full" width="300" height="190"></media:content>
+				<category>breaking news - Property</category>
+				<pubDate>Mon, 16 Mar 2020 13:53:18 +0700</pubDate>
+			</item>
+			<atom:link href="https://sindikasi.okezone.com/index.php/rss/0/RSS2.0" rel="self" type="application/rss+xml" />
+		</channel>
+	</rss>
+	`
+
+	w.Header().Set("content-type", "image/svg+xml")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, responseXML)
+}
+
 func TestBBCNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeBBCServer))
 	defer server.Close()
@@ -206,9 +245,33 @@ func TestDetikNewsFetcher(t *testing.T) {
 		news.News{
 			Title:       "Dummy Title",
 			Url:         "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
-			MediaContent: news.Media{Src: "https://dummy.png"},
+			Enclosure:   news.Media{Src: "https://dummy.png"},
 			Description: news.Description{Text: "\"Dummy description\""},
 			PubDate:     "Sun, 15 Mar 2020 18:34:46 +0700",
+		},
+	}
+
+	fetcher := NewFetcher()
+	data, err := fetcher.Fetch(server.URL)
+	if err != nil {
+		t.Fatalf("Error occured: %q", err)
+	}
+
+	assertLength(t, expectedResult, data)
+	assertElements(t, expectedResult, data)
+}
+
+func TestOkezoneNewsFetcher(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(fakeOkezoneServer))
+	defer server.Close()
+
+	expectedResult := []news.News{
+		news.News{
+			Title:        "Dummy Title",
+			Url:          "https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik",
+			MediaContent: news.Media{Src: "https://dummy.jpg?w=300"},
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Mon, 16 Mar 2020 13:53:18 +0700",
 		},
 	}
 
@@ -234,6 +297,10 @@ func assertElements(t *testing.T, expected []news.News, got []news.News) {
 	for index, val := range expected {
 		if val.Title != got[index].Title {
 			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Title, got[index].Title)
+		}
+
+		if val.Enclosure.Src != got[index].Enclosure.Src {
+			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Enclosure.Src, got[index].Enclosure.Src)
 		}
 
 		if val.MediaContent.Src != got[index].MediaContent.Src {
