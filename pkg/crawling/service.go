@@ -3,6 +3,8 @@ package crawling
 import (
 	"errors"
 	"github.com/imam98/api-wartapedia/pkg/news"
+	"regexp"
+	"strings"
 )
 
 type NewsFetcher interface {
@@ -44,7 +46,9 @@ func (c *crawling) Crawl(flags news.SourceFlag) error {
 			break
 		}
 
-		val.Source = genSourceFromFlags(flags)
+		source, prefix := parseSourceFromFlags(flags)
+		val.Source = source
+		val.ID = genDocID(prefix, val.Url)
 		if err := c.repo.Store(val); err != nil {
 			return err
 		}
@@ -53,19 +57,41 @@ func (c *crawling) Crawl(flags news.SourceFlag) error {
 	return nil
 }
 
-func genSourceFromFlags(flags news.SourceFlag) string {
+func parseSourceFromFlags(flags news.SourceFlag) (source, prefix string) {
 	switch flags.SourceOnly() {
 	case news.ANTARANEWS:
-		return "AntaraNews"
+		source = "AntaraNews"
+		prefix = "atn"
 	case news.BBC:
-		return "BBC"
+		source = "BBC"
+		prefix = "bbc"
 	case news.DETIK:
-		return "Detik"
+		source = "Detik"
+		prefix = "dtk"
 	case news.OKEZONE:
-		return "Okezone"
+		source = "Okezone"
+		prefix = "okz"
 	case news.REPUBLIKA:
-		return "Republika"
+		source = "Republika"
+		prefix = "rpb"
 	default:
-		return "-"
+		source = "-"
+		prefix = "-"
 	}
+
+	return
+}
+
+func genDocID(prefix, url string) string {
+	sb := strings.Builder{}
+	sb.WriteString(prefix)
+	sb.WriteString("::")
+
+	re, _ := regexp.Compile("(http://|https://)")
+	url = re.ReplaceAllString(url, "")
+	segment := strings.Split(url, "/")
+	id := segment[len(segment) - 1]
+	sb.WriteString(id)
+
+	return sb.String()
 }
