@@ -90,7 +90,7 @@ func genDocID(prefix, url string) string {
 	re, _ := regexp.Compile("(http://|https://)")
 	url = re.ReplaceAllString(url, "")
 	segment := strings.Split(url, "/")
-	id := segment[len(segment) - 1]
+	id := segment[len(segment)-1]
 	sb.WriteString(id)
 
 	return sb.String()
