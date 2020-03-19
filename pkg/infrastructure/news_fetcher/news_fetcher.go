@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"github.com/imam98/api-wartapedia/pkg/news"
 	"net/http"
+	"regexp"
 )
 
 type fetcher struct{}
@@ -34,6 +35,23 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 	var data newsResults
 	if err := xml.NewDecoder(response.Body).Decode(&data); err != nil {
 		return nil, err
+	}
+
+	matched, err := regexp.MatchString(`(detik|antaranews)`, url)
+	if err != nil {
+		return nil, err
+	}
+	if matched {
+		re, err := regexp.Compile(`<img src=\"([a-z0-9:\/\-._]+).*/?>`)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := 0; i < len(data.N); i++ {
+			subs := re.FindStringSubmatch(data.N[i].Description.Text)
+			data.N[i].MediaContent.Src = subs[1]
+			data.N[i].Description.Text = re.ReplaceAllString(data.N[i].Description.Text, "")
+		}
 	}
 
 	return data.N, nil

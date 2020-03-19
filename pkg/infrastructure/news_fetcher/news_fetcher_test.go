@@ -24,21 +24,21 @@ func fakeAntaraServer(w http.ResponseWriter, r *http.Request) {
 		  <title>Dummy Title</title>
 		  <link>https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota</link>
 		  <pubDate>Sun, 15 Mar 2020 15:51:04 +0700</pubDate>
-		  <description><![CDATA[<img src="dummy.jpg">Dummy description]]></description>
+		  <description><![CDATA[<img src="https://dummy.jpg" align="left" border="0">Dummy description]]></description>
 		  <guid isPermaLink="false">https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota</guid>
 		</item>
 		<item>
 		  <title>Dummy Title</title>
 		  <link>https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah</link>
 		  <pubDate>Sun, 15 Mar 2020 15:51:04 +0700</pubDate>
-		  <description><![CDATA[<img src="dummy.jpg">Dummy description]]></description>
+		  <description><![CDATA[<img src="https://dummy.jpg" align="left" border="0">Dummy description]]></description>
 		  <guid isPermaLink="false">https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah</guid>
 		</item>
 		<item>
 		  <title>Dummy Title</title>
 		  <link>https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah</link>
 		  <pubDate>Sun, 15 Mar 2020 15:51:04 +0700</pubDate>
-		  <description><![CDATA[<img src="dummy.jpg">Dummy description]]></description>
+		  <description><![CDATA[<img src="https://dummy.jpg" align="left" border="0">Dummy description]]></description>
 		  <guid isPermaLink="false">https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah</guid>
 		</item>
 	  </channel>
@@ -116,7 +116,7 @@ func fakeDetikServer(w http.ResponseWriter, r *http.Request) {
 				<link>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</link>
 				<guid>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</guid>
 				<pubDate>Sun, 15 Mar 2020 18:34:46 +0700</pubDate>
-				<description><img src="https://dummy.png" align="left" hspace="7" width="100" /><![CDATA["Dummy description"]]></description>
+				<description>&lt;img src=&quot;https://dummy.jpeg&quot; align=&quot;left&quot; hspace=&quot;7&quot; width=&quot;100&quot; /&gt;<![CDATA["Dummy description"]]></description>
 				<enclosure url="https://dummy.png" length="10240" type="image/png" />
 			</item>
 		</channel>
@@ -264,27 +264,31 @@ func TestAntaraNewsFetcher(t *testing.T) {
 
 	expectedResult := []news.News{
 		news.News{
-			Title:       "Dummy Title",
-			Url:         "https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
-			Description: news.Description{Text: "<img src=\"dummy.jpg\">Dummy description"},
-			PubDate:     "Sun, 15 Mar 2020 15:51:04 +0700",
+			Title:        "Dummy Title",
+			Url:          "https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
+			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
 		},
 		news.News{
-			Title:       "Dummy Title",
-			Url:         "https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah",
-			Description: news.Description{Text: "<img src=\"dummy.jpg\">Dummy description"},
-			PubDate:     "Sun, 15 Mar 2020 15:51:04 +0700",
+			Title:        "Dummy Title",
+			Url:          "https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah",
+			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
 		},
 		news.News{
-			Title:       "Dummy Title",
-			Url:         "https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah",
-			Description: news.Description{Text: "<img src=\"dummy.jpg\">Dummy description"},
-			PubDate:     "Sun, 15 Mar 2020 15:51:04 +0700",
+			Title:        "Dummy Title",
+			Url:          "https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah",
+			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
 		},
 	}
 
 	fetcher := NewFetcher()
-	data, err := fetcher.Fetch(server.URL)
+	url := fmt.Sprintf("%s/antaranews", server.URL)
+	data, err := fetcher.Fetch(url)
 	if err != nil {
 		t.Fatalf("Error occured: %q", err)
 	}
@@ -299,16 +303,17 @@ func TestDetikNewsFetcher(t *testing.T) {
 
 	expectedResult := []news.News{
 		news.News{
-			Title:       "Dummy Title",
-			Url:         "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
-			Enclosure:   news.Media{Src: "https://dummy.png"},
-			Description: news.Description{Text: "\"Dummy description\""},
-			PubDate:     "Sun, 15 Mar 2020 18:34:46 +0700",
+			Title:        "Dummy Title",
+			Url:          "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
+			MediaContent: news.Media{Src: "https://dummy.jpeg"},
+			Description:  news.Description{Text: "\"Dummy description\""},
+			PubDate:      "Sun, 15 Mar 2020 18:34:46 +0700",
 		},
 	}
 
 	fetcher := NewFetcher()
-	data, err := fetcher.Fetch(server.URL)
+	url := fmt.Sprintf("%s/detik", server.URL)
+	data, err := fetcher.Fetch(url)
 	if err != nil {
 		t.Fatalf("Error occured: %q", err)
 	}
@@ -374,13 +379,10 @@ func assertLength(t *testing.T, expected []news.News, got []news.News) {
 }
 
 func assertElements(t *testing.T, expected []news.News, got []news.News) {
+	t.Helper()
 	for index, val := range expected {
 		if val.Title != got[index].Title {
 			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Title, got[index].Title)
-		}
-
-		if val.Enclosure.Src != got[index].Enclosure.Src {
-			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Enclosure.Src, got[index].Enclosure.Src)
 		}
 
 		if val.MediaContent.Src != got[index].MediaContent.Src {
