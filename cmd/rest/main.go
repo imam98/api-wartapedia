@@ -10,20 +10,44 @@ import (
 	"net/http"
 )
 
+type response struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message,omitempty"`
+	Data    []news.News `json:"data,omitempty"`
+}
+
 func newsHandler(w http.ResponseWriter, r *http.Request) {
 	fetcher := news_fetcher.NewFetcher()
 	service := listing.NewService(fetcher)
+	encoder := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
 
 	q := r.URL.Query()
 	flags := genSourceFlags(q.Get("cat"), q.Get("pub"))
 	data, err := service.GetNews(flags)
 	if err != nil {
-		http.Error(w, "News source not found", http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
+		resp := response{
+			Status:  http.StatusNotFound,
+			Message: "News source not found",
+		}
+		encoder.Encode(resp)
+
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	resp := response{
+		Status: http.StatusOK,
+		Data:   data,
+	}
+	if err := encoder.Encode(resp); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		resp := response{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		}
+		encoder.Encode(resp)
+
 		return
 	}
 }
