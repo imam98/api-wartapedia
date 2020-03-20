@@ -42,7 +42,7 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 		return nil, err
 	}
 	if matched {
-		re, err := regexp.Compile(`<img src=\"([a-z0-9:\/\-._]+).*/?>`)
+		re, err := regexp.Compile(`<img src=\"([a-z0-9A-Z:\/\-._]+).*/?>`)
 		if err != nil {
 			return nil, err
 		}
