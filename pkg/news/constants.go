@@ -41,3 +41,24 @@ var (
 func (s SourceFlag) SourceOnly() SourceFlag {
 	return s & SourceFlag(15)
 }
+
+func (s SourceFlag) CategoryOnly() SourceFlag {
+	return s & SourceFlag(240)
+}
+
+func (s SourceFlag) SourceString() string {
+	switch s.SourceOnly() {
+	case ANTARANEWS:
+		return "AntaraNews"
+	case BBC:
+		return "BBC"
+	case DETIK:
+		return "Detik"
+	case OKEZONE:
+		return "Okezone"
+	case REPUBLIKA:
+		return "Republika"
+	default:
+		return "-"
+	}
+}

@@ -70,3 +70,69 @@ func TestGetNews(t *testing.T) {
 		}
 	})
 }
+
+func TestGetPublishers(t *testing.T) {
+	testcases := []struct {
+		name     string
+		given    news.SourceFlag
+		expected []string
+	}{
+		{
+			name:     "Category: Nasional",
+			given:    news.CAT_NASIONAL,
+			expected: []string{"AntaraNews", "BBC", "Detik", "Okezone", "Republika"},
+		},
+		{
+			name:     "Category: Dunia",
+			given:    news.CAT_DUNIA,
+			expected: []string{"AntaraNews", "BBC", "Detik", "Republika"},
+		},
+		{
+			name:     "Category: Tekno",
+			given:    news.CAT_TEKNO,
+			expected: []string{"AntaraNews", "Okezone", "Republika"},
+		},
+	}
+
+	fetcher := &fakeFetcher{}
+	service := NewService(fetcher)
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := service.GetPublishersFromCategory(tc.given)
+			assertError(t, nil, err)
+
+			if !reflect.DeepEqual(tc.expected, got) {
+				t.Errorf("Unexpected value\nExpected: %v\nGiven: %b\nGot: %v\n", tc.expected, tc.given, got)
+			}
+		})
+	}
+
+	t.Run("Category: Invalid", func(t *testing.T) {
+		given := news.SourceFlag(news.ANTARANEWS)
+		expected := ErrInvalidCategoryFlag
+
+		_, got := service.GetPublishersFromCategory(given)
+		assertError(t, expected, got)
+	})
+
+	t.Run("Category: Invalid #2", func(t *testing.T) {
+		given := news.SourceFlag(news.CAT_NASIONAL | news.ANTARANEWS)
+		expected := ErrInvalidCategoryFlag
+
+		_, got := service.GetPublishersFromCategory(given)
+		assertError(t, expected, got)
+	})
+}
+
+func assertError(t *testing.T, expected error, got error) {
+	t.Helper()
+
+	if got == nil && expected != nil {
+		t.Error("Expect to get error")
+	} else if got != nil && expected == nil {
+		t.Fatalf("Expect no error, got: %q\n", got)
+	} else if got != nil && expected != nil && expected != got {
+		t.Errorf("Unexpected error\nExpected: %q\nGot: %q", expected, got)
+	}
+}
