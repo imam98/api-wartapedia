@@ -26,13 +26,7 @@ func newsHandler(w http.ResponseWriter, r *http.Request) {
 	flags := genSourceFlags(q.Get("cat"), q.Get("pub"))
 	data, err := service.GetNews(flags)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		resp := response{
-			Status:  http.StatusNotFound,
-			Message: "News source not found",
-		}
-		encoder.Encode(resp)
-
+		handleError(w, http.StatusNotFound, "News source not found")
 		return
 	}
 
@@ -41,13 +35,34 @@ func newsHandler(w http.ResponseWriter, r *http.Request) {
 		Data:   data,
 	}
 	if err := encoder.Encode(resp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		resp := response{
-			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
-		}
-		encoder.Encode(resp)
+		handleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
 
+func publisherListHandler(w http.ResponseWriter, r *http.Request) {
+	fetcher := news_fetcher.NewFetcher()
+	service := listing.NewService(fetcher)
+	encoder := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+
+	q := r.URL.Query()
+	catFlag := genSourceFlags(q.Get("cat"), "")
+	publishers, err := service.GetPublishersFromCategory(catFlag)
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	resp := struct{
+		Status int `json:"status"`
+		Data []string `json:"data"`
+	}{
+		Status: http.StatusOK,
+		Data:   publishers,
+	}
+	if err := encoder.Encode(resp); err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 }
@@ -55,6 +70,7 @@ func newsHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/news", newsHandler)
+	r.HandleFunc("/api/list/publisher", publisherListHandler)
 	handler := http.Handler(r)
 	handler = checkQueryString(handler)
 	handler = allowOnlyGet(handler)
@@ -92,4 +108,14 @@ func genSourceFlags(category, publisher string) news.SourceFlag {
 	}
 
 	return catFlag | pubFlag
+}
+
+func handleError(w http.ResponseWriter, status int, message string) {
+	responseErr := response{
+		Status:  status,
+		Message: message,
+	}
+
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(responseErr)
 }

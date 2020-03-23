@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -9,16 +8,9 @@ import (
 func allowOnlyGet(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		method := r.Method
+		w.Header().Set("Content-Type", "application/json")
 		if method != "GET" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-
-			resp := response{
-				Status:  http.StatusBadRequest,
-				Message: "Bad request method",
-			}
-			json.NewEncoder(w).Encode(resp)
-
+			handleError(w, http.StatusBadRequest, "Bad request method")
 			log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)
 			return
 		}
@@ -30,17 +22,19 @@ func allowOnlyGet(next http.Handler) http.Handler {
 func checkQueryString(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		if q.Get("cat") == "" || q.Get("pub") == "" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-
-			resp := response{
-				Status:  http.StatusBadRequest,
-				Message: "Query params must not be empty",
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/api/news" {
+			if q.Get("cat") == "" || q.Get("pub") == "" {
+				handleError(w, http.StatusBadRequest, "Query params must not be empty")
+				log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)
+				return
 			}
-			json.NewEncoder(w).Encode(resp)
-			log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)
-			return
+		} else if r.URL.Path == "/api/list/publisher" {
+			if q.Get("cat") == "" {
+				handleError(w, http.StatusBadRequest, "Query params must not be empty")
+				log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)
+				return
+			}
 		}
 
 		log.Printf("GET %q", r.URL.String())
