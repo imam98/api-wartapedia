@@ -53,5 +53,3 @@ func (l *listing) GetPublishersFromCategory(catFlag news.SourceFlag) ([]string, 
 	sort.Strings(categories)
 	return categories, nil
 }
-
-

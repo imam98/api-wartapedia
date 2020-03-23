@@ -54,9 +54,9 @@ func publisherListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := struct{
-		Status int `json:"status"`
-		Data []string `json:"data"`
+	resp := struct {
+		Status int      `json:"status"`
+		Data   []string `json:"data"`
 	}{
 		Status: http.StatusOK,
 		Data:   publishers,
