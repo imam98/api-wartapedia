@@ -14,7 +14,6 @@ type listing struct {
 	nf NewsFetcher
 }
 
-var ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 var ErrInvalidCategoryFlag = errors.New("category flag is invalid")
 
 func NewService(fetcher NewsFetcher) news.ListerService {
@@ -26,7 +25,7 @@ func NewService(fetcher NewsFetcher) news.ListerService {
 func (l *listing) GetNews(flags news.SourceFlag) ([]news.News, error) {
 	url, ok := news.Sources[flags]
 	if !ok {
-		return nil, ErrSourceNotFound
+		return nil, news.ErrSourceNotFound
 	}
 
 	data, err := l.nf.Fetch(url)

@@ -1,7 +1,6 @@
 package crawling
 
 import (
-	"errors"
 	"github.com/imam98/api-wartapedia/pkg/news"
 	"regexp"
 	"strings"
@@ -15,8 +14,6 @@ type Repository interface {
 	Find(key string) (news.News, error)
 	Store(news news.News) error
 }
-
-var ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 
 type crawling struct {
 	repo Repository
@@ -33,7 +30,7 @@ func NewCrawler(repo Repository, fetcher NewsFetcher) *crawling {
 func (c *crawling) Crawl(flags news.SourceFlag) error {
 	url, ok := news.Sources[flags]
 	if !ok {
-		return ErrSourceNotFound
+		return news.ErrSourceNotFound
 	}
 
 	data, err := c.nf.Fetch(url)
@@ -46,8 +43,8 @@ func (c *crawling) Crawl(flags news.SourceFlag) error {
 			break
 		}
 
-		source, prefix := parseSourceFromFlags(flags)
-		val.Source = source
+		val.Source = flags.SourceString()
+		prefix := parsePrefixFromFlags(flags)
 		val.ID = genDocID(prefix, val.Url)
 		if err := c.repo.Store(val); err != nil {
 			return err
@@ -57,29 +54,21 @@ func (c *crawling) Crawl(flags news.SourceFlag) error {
 	return nil
 }
 
-func parseSourceFromFlags(flags news.SourceFlag) (source, prefix string) {
+func parsePrefixFromFlags(flags news.SourceFlag) string {
 	switch flags.SourceOnly() {
 	case news.ANTARANEWS:
-		source = "AntaraNews"
-		prefix = "atn"
+		return "atn"
 	case news.BBC:
-		source = "BBC"
-		prefix = "bbc"
+		return "bbc"
 	case news.DETIK:
-		source = "Detik"
-		prefix = "dtk"
+		return "dtk"
 	case news.OKEZONE:
-		source = "Okezone"
-		prefix = "okz"
+		return "okz"
 	case news.REPUBLIKA:
-		source = "Republika"
-		prefix = "rpb"
+		return "rpb"
 	default:
-		source = "-"
-		prefix = "-"
+		return "-"
 	}
-
-	return
 }
 
 func genDocID(prefix, url string) string {

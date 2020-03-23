@@ -47,9 +47,7 @@ func TestGetNews(t *testing.T) {
 			},
 		}
 		got, err := service.GetNews(news.CAT_NASIONAL | news.DETIK)
-		if err != nil {
-			t.Fatalf("Expect no error, got: %q\n", err)
-		}
+		assertError(t, nil, err)
 
 		if !reflect.DeepEqual(expected, got) {
 			t.Errorf("Unexpected value\nExpected: %#v\nGot: %#v\n", expected, got)
@@ -60,14 +58,8 @@ func TestGetNews(t *testing.T) {
 		fetcher := &fakeFetcher{}
 		service := NewService(fetcher)
 
-		_, err := service.GetNews(news.CAT_TEKNO | news.DETIK)
-		if err == nil {
-			t.Fatal("Should throw error here")
-		}
-
-		if err != ErrSourceNotFound {
-			t.Errorf("Unexpected error\nExpected: %q\nGot: %q\n", ErrSourceNotFound, err)
-		}
+		_, got := service.GetNews(news.CAT_TEKNO | news.DETIK)
+		assertError(t, news.ErrSourceNotFound, got)
 	})
 }
 

@@ -36,6 +36,7 @@ var Sources = map[SourceFlag]string{
 var (
 	ErrItemNotFound  = errors.New("Error item not found")
 	ErrItemDuplicate = errors.New("Error item already exists")
+	ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 )
 
 func (s SourceFlag) SourceOnly() SourceFlag {

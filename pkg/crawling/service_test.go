@@ -40,7 +40,7 @@ func TestGenSource(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, _ := parseSourceFromFlags(tc.given)
+			got := tc.given.SourceString()
 			if got != tc.expected {
 				t.Errorf("Value doesn't match\nExpected: %q\nGiven: %b\nGot: %q\n", tc.expected, tc.given, got)
 			}
@@ -77,7 +77,7 @@ func TestGenDocID(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, prefix := parseSourceFromFlags(tc.flags)
+			prefix := parsePrefixFromFlags(tc.flags)
 			got := genDocID(prefix, tc.given)
 
 			if got != tc.expected {
