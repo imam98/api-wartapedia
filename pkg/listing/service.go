@@ -22,7 +22,7 @@ func NewService(fetcher NewsFetcher) news.ListerService {
 	}
 }
 
-func (l *listing) GetNews(flags news.SourceFlag) ([]news.News, error) {
+func (l *listing) GetNews(flags news.RepoFlag) ([]news.News, error) {
 	url, ok := news.Sources[flags]
 	if !ok {
 		return nil, news.ErrSourceNotFound
@@ -36,19 +36,19 @@ func (l *listing) GetNews(flags news.SourceFlag) ([]news.News, error) {
 	return data, nil
 }
 
-func (l *listing) GetPublishersFromCategory(catFlag news.SourceFlag) ([]string, error) {
+func (l *listing) GetSourcesFromCategory(catFlag news.RepoFlag) ([]string, error) {
 	if catFlag.CategoryOnly() != catFlag {
 		return nil, ErrInvalidCategoryFlag
 	}
 
-	var categories []string
+	var sources []string
 	for idx, _ := range news.Sources {
 		if catFlag^idx.CategoryOnly() == 0 {
-			cat := idx.SourceString()
-			categories = append(categories, cat)
+			src := idx.SourceString()
+			sources = append(sources, src)
 		}
 	}
 
-	sort.Strings(categories)
-	return categories, nil
+	sort.Strings(sources)
+	return sources, nil
 }

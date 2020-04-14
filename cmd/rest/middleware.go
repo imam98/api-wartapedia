@@ -24,12 +24,12 @@ func checkQueryString(next http.Handler) http.Handler {
 		q := r.URL.Query()
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/news" {
-			if q.Get("cat") == "" || q.Get("pub") == "" {
+			if q.Get("cat") == "" || q.Get("src") == "" {
 				handleError(w, http.StatusBadRequest, "Query params must not be empty")
 				log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)
 				return
 			}
-		} else if r.URL.Path == "/api/list/publisher" {
+		} else if r.URL.Path == "/api/list/source" {
 			if q.Get("cat") == "" {
 				handleError(w, http.StatusBadRequest, "Query params must not be empty")
 				log.Printf("%s %q %v", r.Method, r.URL.String(), http.StatusBadRequest)

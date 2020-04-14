@@ -27,7 +27,7 @@ func NewCrawler(repo Repository, fetcher NewsFetcher) *crawling {
 	}
 }
 
-func (c *crawling) Crawl(flags news.SourceFlag) error {
+func (c *crawling) Crawl(flags news.RepoFlag) error {
 	url, ok := news.Sources[flags]
 	if !ok {
 		return news.ErrSourceNotFound
@@ -54,7 +54,7 @@ func (c *crawling) Crawl(flags news.SourceFlag) error {
 	return nil
 }
 
-func parsePrefixFromFlags(flags news.SourceFlag) string {
+func parsePrefixFromFlags(flags news.RepoFlag) string {
 	switch flags.SourceOnly() {
 	case news.ANTARANEWS:
 		return "atn"

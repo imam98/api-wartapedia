@@ -23,7 +23,7 @@ func newsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	q := r.URL.Query()
-	flags := genSourceFlags(q.Get("cat"), q.Get("pub"))
+	flags := genRepoFlags(q.Get("cat"), q.Get("src"))
 	data, err := service.GetNews(flags)
 	if err != nil {
 		handleError(w, http.StatusNotFound, "News source not found")
@@ -40,15 +40,15 @@ func newsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func publisherListHandler(w http.ResponseWriter, r *http.Request) {
+func sourceListHandler(w http.ResponseWriter, r *http.Request) {
 	fetcher := news_fetcher.NewFetcher()
 	service := listing.NewService(fetcher)
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", "application/json")
 
 	q := r.URL.Query()
-	catFlag := genSourceFlags(q.Get("cat"), "")
-	publishers, err := service.GetPublishersFromCategory(catFlag)
+	catFlag := genRepoFlags(q.Get("cat"), "")
+	source, err := service.GetSourcesFromCategory(catFlag)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -59,7 +59,7 @@ func publisherListHandler(w http.ResponseWriter, r *http.Request) {
 		Data   []string `json:"data"`
 	}{
 		Status: http.StatusOK,
-		Data:   publishers,
+		Data:   source,
 	}
 	if err := encoder.Encode(resp); err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
@@ -70,7 +70,7 @@ func publisherListHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/news", newsHandler)
-	r.HandleFunc("/api/list/publisher", publisherListHandler)
+	r.HandleFunc("/api/list/source", sourceListHandler)
 	handler := http.Handler(r)
 	handler = checkQueryString(handler)
 	handler = allowOnlyGet(handler)
@@ -78,8 +78,8 @@ func main() {
 	http.ListenAndServe(":3000", handler)
 }
 
-func genSourceFlags(category, publisher string) news.SourceFlag {
-	var catFlag news.SourceFlag
+func genRepoFlags(category, source string) news.RepoFlag {
+	var catFlag news.RepoFlag
 	switch category {
 	case "nasional":
 		catFlag = news.CAT_NASIONAL
@@ -88,26 +88,26 @@ func genSourceFlags(category, publisher string) news.SourceFlag {
 	case "tekno":
 		catFlag = news.CAT_TEKNO
 	default:
-		catFlag = news.SourceFlag(0)
+		catFlag = news.RepoFlag(0)
 	}
 
-	var pubFlag news.SourceFlag
-	switch publisher {
+	var srcFlag news.RepoFlag
+	switch source {
 	case "antaranews":
-		pubFlag = news.ANTARANEWS
+		srcFlag = news.ANTARANEWS
 	case "bbc":
-		pubFlag = news.BBC
+		srcFlag = news.BBC
 	case "detik":
-		pubFlag = news.DETIK
+		srcFlag = news.DETIK
 	case "okezone":
-		pubFlag = news.OKEZONE
+		srcFlag = news.OKEZONE
 	case "republika":
-		pubFlag = news.REPUBLIKA
+		srcFlag = news.REPUBLIKA
 	default:
-		pubFlag = news.SourceFlag(0)
+		srcFlag = news.RepoFlag(0)
 	}
 
-	return catFlag | pubFlag
+	return catFlag | srcFlag
 }
 
 func handleError(w http.ResponseWriter, status int, message string) {

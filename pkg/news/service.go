@@ -1,8 +1,8 @@
 package news
 
 type ListerService interface {
-	GetNews(flags SourceFlag) ([]News, error)
-	GetPublishersFromCategory(flags SourceFlag) ([]string, error)
+	GetNews(flags RepoFlag) ([]News, error)
+	GetSourcesFromCategory(flags RepoFlag) ([]string, error)
 }
 
 type QueryService interface {
@@ -10,5 +10,5 @@ type QueryService interface {
 }
 
 type CrawlerService interface {
-	Crawl(flags SourceFlag) error
+	Crawl(flags RepoFlag) error
 }

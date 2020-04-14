@@ -16,9 +16,9 @@ const (
 	CAT_TEKNO    = 48
 )
 
-type SourceFlag byte
+type RepoFlag byte
 
-var Sources = map[SourceFlag]string{
+var Sources = map[RepoFlag]string{
 	CAT_NASIONAL | ANTARANEWS: "https://www.antaranews.com/rss/terkini",
 	CAT_NASIONAL | BBC:        "http://feeds.bbci.co.uk/indonesia/rss.xml",
 	CAT_NASIONAL | DETIK:      "http://rss.detik.com/index.php/detiknews",
@@ -39,16 +39,16 @@ var (
 	ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 )
 
-func (s SourceFlag) SourceOnly() SourceFlag {
-	return s & SourceFlag(15)
+func (r RepoFlag) SourceOnly() RepoFlag {
+	return r & RepoFlag(15)
 }
 
-func (s SourceFlag) CategoryOnly() SourceFlag {
-	return s & SourceFlag(240)
+func (r RepoFlag) CategoryOnly() RepoFlag {
+	return r & RepoFlag(240)
 }
 
-func (s SourceFlag) SourceString() string {
-	switch s.SourceOnly() {
+func (r RepoFlag) SourceString() string {
+	switch r.SourceOnly() {
 	case ANTARANEWS:
 		return "AntaraNews"
 	case BBC:

@@ -8,7 +8,7 @@ import (
 func TestGenSource(t *testing.T) {
 	testcases := []struct {
 		name     string
-		given    news.SourceFlag
+		given    news.RepoFlag
 		expected string
 	}{
 		{
@@ -52,7 +52,7 @@ func TestGenDocID(t *testing.T) {
 	testcases := []struct {
 		name     string
 		given    string
-		flags    news.SourceFlag
+		flags    news.RepoFlag
 		expected string
 	}{
 		{

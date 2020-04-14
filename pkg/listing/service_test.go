@@ -63,10 +63,10 @@ func TestGetNews(t *testing.T) {
 	})
 }
 
-func TestGetPublishers(t *testing.T) {
+func TestGetSources(t *testing.T) {
 	testcases := []struct {
 		name     string
-		given    news.SourceFlag
+		given    news.RepoFlag
 		expected []string
 	}{
 		{
@@ -91,7 +91,7 @@ func TestGetPublishers(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := service.GetPublishersFromCategory(tc.given)
+			got, err := service.GetSourcesFromCategory(tc.given)
 			assertError(t, nil, err)
 
 			if !reflect.DeepEqual(tc.expected, got) {
@@ -101,18 +101,18 @@ func TestGetPublishers(t *testing.T) {
 	}
 
 	t.Run("Category: Invalid", func(t *testing.T) {
-		given := news.SourceFlag(news.ANTARANEWS)
+		given := news.RepoFlag(news.ANTARANEWS)
 		expected := ErrInvalidCategoryFlag
 
-		_, got := service.GetPublishersFromCategory(given)
+		_, got := service.GetSourcesFromCategory(given)
 		assertError(t, expected, got)
 	})
 
 	t.Run("Category: Invalid #2", func(t *testing.T) {
-		given := news.SourceFlag(news.CAT_NASIONAL | news.ANTARANEWS)
+		given := news.RepoFlag(news.CAT_NASIONAL | news.ANTARANEWS)
 		expected := ErrInvalidCategoryFlag
 
-		_, got := service.GetPublishersFromCategory(given)
+		_, got := service.GetSourcesFromCategory(given)
 		assertError(t, expected, got)
 	})
 }
