@@ -117,6 +117,14 @@ func TestGetSources(t *testing.T) {
 	})
 }
 
+func BenchmarkGetSources(b *testing.B) {
+	fetcher := &fakeFetcher{}
+	service := NewService(fetcher)
+	for i := 0; i < b.N; i++ {
+		service.GetSourcesFromCategory(news.RepoFlag(news.CAT_TEKNO))
+	}
+}
+
 func assertError(t *testing.T, expected error, got error) {
 	t.Helper()
 

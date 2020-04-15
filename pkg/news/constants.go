@@ -47,6 +47,11 @@ func (r RepoFlag) CategoryOnly() RepoFlag {
 	return r & RepoFlag(240)
 }
 
+func (r RepoFlag) Validate() bool {
+	_, ok := Sources[r]
+	return ok
+}
+
 func (r RepoFlag) SourceString() string {
 	switch r.SourceOnly() {
 	case ANTARANEWS:

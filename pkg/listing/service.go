@@ -42,9 +42,10 @@ func (l *listing) GetSourcesFromCategory(catFlag news.RepoFlag) ([]string, error
 	}
 
 	var sources []string
-	for idx, _ := range news.Sources {
-		if catFlag^idx.CategoryOnly() == 0 {
-			src := idx.SourceString()
+	for i := 1; i <= 5; i++ {
+		flags := catFlag | news.RepoFlag(i)
+		if flags.Validate() {
+			src := flags.SourceString()
 			sources = append(sources, src)
 		}
 	}
