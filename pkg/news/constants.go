@@ -20,8 +20,8 @@ type RepoFlag byte
 
 var Sources = map[RepoFlag]string{
 	CAT_NASIONAL | ANTARANEWS: "https://www.antaranews.com/rss/terkini",
-	CAT_NASIONAL | BBC:        "http://feeds.bbci.co.uk/indonesia/rss.xml",
-	CAT_NASIONAL | DETIK:      "http://rss.detik.com/index.php/detiknews",
+	CAT_NASIONAL | BBC:        "http://feeds.bbci.co.uk/indonesia/indonesia/rss.xml",
+	CAT_NASIONAL | DETIK:      "http://rss.detik.com/index.php/detikcom_nasional",
 	CAT_NASIONAL | OKEZONE:    "http://sindikasi.okezone.com/index.php/rss/1/RSS2.0",
 	CAT_NASIONAL | REPUBLIKA:  "https://www.republika.co.id/rss/nasional/",
 	CAT_DUNIA | ANTARANEWS:    "https://www.antaranews.com/rss/dunia",
