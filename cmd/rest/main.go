@@ -6,8 +6,10 @@ import (
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/news_fetcher"
 	"github.com/imam98/api-wartapedia/pkg/listing"
 	"github.com/imam98/api-wartapedia/pkg/news"
-	"log"
+	"github.com/rs/zerolog"
 	"net/http"
+	"os"
+	"time"
 )
 
 type response struct {
@@ -68,13 +70,20 @@ func sourceListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	output := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC822Z,
+	}
+	logger := zerolog.New(output).With().Timestamp().Logger()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/api/news", newsHandler)
 	r.HandleFunc("/api/list/source", sourceListHandler)
 	handler := http.Handler(r)
-	handler = checkQueryString(handler)
-	handler = allowOnlyGet(handler)
-	log.Println("Service listening to port 3000")
+	handler = checkQueryString(handler, logger)
+	handler = allowOnlyGet(handler, logger)
+
+	logger.Info().Msg("Service listening to port 3000")
 	http.ListenAndServe(":3000", handler)
 }
 
