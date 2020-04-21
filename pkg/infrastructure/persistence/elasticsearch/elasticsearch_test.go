@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -79,6 +80,14 @@ func TestFind(t *testing.T) {
 		},
 	}
 	ft.RoundTripFn = func(req *http.Request) (response *http.Response, err error) {
+		path := strings.Split(req.URL.Path, "/")
+		if path[len(path) - 1] != "abc:123" {
+			return &http.Response{
+				StatusCode: http.StatusNotFound,
+				Body:       fixture("find_not_found.json"),
+			}, nil
+		}
+
 		return ft.Response, nil
 	}
 
@@ -91,24 +100,37 @@ func TestFind(t *testing.T) {
 
 	repo := NewRepository(Config{
 		Client: client,
+		IndexName: "testing",
 	})
 
-	expected := news.News{
-		ID:           "abc:123",
-		Source:       "abc",
-		Title:        "Dummy Title",
-		MediaContent: news.Media{Src: "http://dummy.jpg"},
-		Url:          "http://dummy.id",
-		Description:  news.Description{Text: "Dummy description"},
-		PubDate:      "01 Mar 2020 14:53:01 +0700",
-	}
+	t.Run("Document exists", func(t *testing.T) {
+		expected := news.News{
+			ID:           "abc:123",
+			Source:       "abc",
+			Title:        "Dummy Title",
+			MediaContent: news.Media{Src: "http://dummy.jpg"},
+			Url:          "http://dummy.id",
+			Description:  news.Description{Text: "Dummy description"},
+			PubDate:      "Fri, 03 Apr 2020 08:03:33 GMT",
+		}
 
-	got, err := repo.Find("5")
-	if err != nil {
-		t.Errorf("Expect no error, got: %q", err.Error())
-	}
+		got, err := repo.Find("abc:123")
+		if err != nil {
+			t.Errorf("Expect no error, got: %q", err.Error())
+		}
 
-	if !reflect.DeepEqual(expected, got) {
-		t.Errorf("Unexpected value\nExpected: %#v\nGot: %#v", expected, got)
-	}
+		if !reflect.DeepEqual(expected, got) {
+			t.Errorf("Unexpected value\nExpected: %#v\nGot: %#v", expected, got)
+		}
+	})
+
+	t.Run("Document not exists", func(t *testing.T) {
+		expected := news.ErrItemNotFound
+		_, got := repo.Find("abc:235")
+		if got == nil {
+			t.Error("Expect to get error, got no error")
+		} else if expected != got {
+			t.Errorf("Unexpected error\nExpected: %q\nGot: %q\n", expected, got)
+		}
+	})
 }
