@@ -48,9 +48,9 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 		}
 
 		for i := 0; i < len(data.N); i++ {
-			subs := re.FindStringSubmatch(data.N[i].Description.Text)
+			subs := re.FindStringSubmatch(data.N[i].Description)
 			data.N[i].MediaContent.Src = subs[1]
-			data.N[i].Description.Text = re.ReplaceAllString(data.N[i].Description.Text, "")
+			data.N[i].Description = re.ReplaceAllString(data.N[i].Description, "")
 		}
 	}
 

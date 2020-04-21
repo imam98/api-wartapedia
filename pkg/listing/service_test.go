@@ -14,7 +14,7 @@ func (f *fakeFetcher) Fetch(url string) ([]news.News, error) {
 			Title:        "Dummy Title",
 			MediaContent: news.Media{Src: "http://dummy.jpg"},
 			Url:          "http://dummy.id",
-			Description:  news.Description{Text: "Dummy description"},
+			Description:  "Dummy description",
 			PubDate:      "01 Mar 2020 14:53:01 +0700",
 		},
 	}
@@ -42,7 +42,7 @@ func TestGetNews(t *testing.T) {
 				Title:        "Dummy Title",
 				MediaContent: news.Media{Src: "http://dummy.jpg"},
 				Url:          "http://dummy.id",
-				Description:  news.Description{Text: "Dummy description"},
+				Description:  "Dummy description",
 				PubDate:      "01 Mar 2020 14:53:01 +0700",
 			},
 		}
