@@ -68,7 +68,7 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 			return nil, err
 		}
 
-		pubTime, err := parseUnixTime(val.PubDate, namedTimezone)
+		unixTime, err := parseUnixTime(val.PubDate, namedTimezone)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 			MediaContent: val.MediaContent.Src,
 			Url:          val.Url,
 			Description:  val.Description,
-			PubDate:      pubTime,
+			PubDate:      unixTime,
 		}
 
 		results = append(results, n)
