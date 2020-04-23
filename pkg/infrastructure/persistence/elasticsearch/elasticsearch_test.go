@@ -81,7 +81,7 @@ func TestFind(t *testing.T) {
 	}
 	ft.RoundTripFn = func(req *http.Request) (response *http.Response, err error) {
 		path := strings.Split(req.URL.Path, "/")
-		if path[len(path) - 1] != "abc:123" {
+		if path[len(path)-1] != "abc:123" {
 			return &http.Response{
 				StatusCode: http.StatusNotFound,
 				Body:       fixture("find_not_found.json"),
@@ -99,7 +99,7 @@ func TestFind(t *testing.T) {
 	}
 
 	repo := NewRepository(Config{
-		Client: client,
+		Client:    client,
 		IndexName: "testing",
 	})
 
@@ -108,10 +108,10 @@ func TestFind(t *testing.T) {
 			ID:           "abc:123",
 			Source:       "abc",
 			Title:        "Dummy Title",
-			MediaContent: news.Media{Src: "http://dummy.jpg"},
+			MediaContent: "http://dummy.jpg",
 			Url:          "http://dummy.id",
-			Description:  news.Description{Text: "Dummy description"},
-			PubDate:      "Fri, 03 Apr 2020 08:03:33 GMT",
+			Description:  "Dummy description",
+			PubDate:      1585901013,
 		}
 
 		got, err := repo.Find("abc:123")

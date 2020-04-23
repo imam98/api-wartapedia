@@ -12,10 +12,10 @@ func (f *fakeFetcher) Fetch(url string) ([]news.News, error) {
 	data := []news.News{
 		news.News{
 			Title:        "Dummy Title",
-			MediaContent: news.Media{Src: "http://dummy.jpg"},
+			MediaContent: "http://dummy.jpg",
 			Url:          "http://dummy.id",
 			Description:  "Dummy description",
-			PubDate:      "01 Mar 2020 14:53:01 +0700",
+			PubDate:      1583049181,
 		},
 	}
 
@@ -40,10 +40,10 @@ func TestGetNews(t *testing.T) {
 		expected := []news.News{
 			news.News{
 				Title:        "Dummy Title",
-				MediaContent: news.Media{Src: "http://dummy.jpg"},
+				MediaContent: "http://dummy.jpg",
 				Url:          "http://dummy.id",
 				Description:  "Dummy description",
-				PubDate:      "01 Mar 2020 14:53:01 +0700",
+				PubDate:      1583049181,
 			},
 		}
 		got, err := service.GetNews(news.CAT_NASIONAL | news.DETIK)

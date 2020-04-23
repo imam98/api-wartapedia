@@ -34,8 +34,8 @@ var Sources = map[RepoFlag]string{
 }
 
 var (
-	ErrItemNotFound  = errors.New("Error item not found")
-	ErrItemDuplicate = errors.New("Error item already exists")
+	ErrItemNotFound   = errors.New("Error item not found")
+	ErrItemDuplicate  = errors.New("Error item already exists")
 	ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 )
 

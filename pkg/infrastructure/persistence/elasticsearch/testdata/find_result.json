@@ -10,9 +10,9 @@
     "id": "abc:123",
     "source": "abc",
     "title":"Dummy Title",
-    "media_content":{"src": "http://dummy.jpg"},
+    "media_content":"http://dummy.jpg",
     "url":"http://dummy.id",
-    "description":{"text":"Dummy description"},
-    "pub_date":"Fri, 03 Apr 2020 08:03:33 GMT"
+    "description":"Dummy description",
+    "pub_date":1585901013
   }
 }

@@ -3,15 +3,29 @@ package news_fetcher
 import (
 	"encoding/xml"
 	"github.com/imam98/api-wartapedia/pkg/news"
+	"html"
 	"net/http"
 	"regexp"
+	"time"
 )
 
 type fetcher struct{}
 
-type newsResults struct {
-	XMLName xml.Name    `xml:"rss"`
-	N       []news.News `xml:"channel>item"`
+type fetchResult struct {
+	XMLName xml.Name     `xml:"rss"`
+	N       []newsResult `xml:"channel>item"`
+}
+
+type newsResult struct {
+	Title        string `xml:"title"`
+	MediaContent media  `xml:"content,omitempty"`
+	Url          string `xml:"link"`
+	Description  string `xml:"description"`
+	PubDate      string `xml:"pubDate"`
+}
+
+type media struct {
+	Src string `xml:"url,attr"`
 }
 
 func NewFetcher() *fetcher {
@@ -19,6 +33,7 @@ func NewFetcher() *fetcher {
 }
 
 func (f *fetcher) Fetch(url string) ([]news.News, error) {
+	var results []news.News
 	client := &http.Client{}
 
 	request, err := http.NewRequest("GET", url, nil)
@@ -32,27 +47,84 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 	}
 	defer response.Body.Close()
 
-	var data newsResults
+	var data fetchResult
 	if err := xml.NewDecoder(response.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	matched, err := regexp.MatchString(`(detik|antaranews)`, url)
+	mustParseMediaContent, err := regexp.MatchString(`(detik|antaranews)`, url)
 	if err != nil {
 		return nil, err
 	}
-	if matched {
-		re, err := regexp.Compile(`<img src=\"([a-z0-9A-Z:\/\-._]+).*/?>`)
+
+	namedTimezone, err := regexp.MatchString(`bbc`, url)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, val := range data.N {
+		err := cleanData(&val, mustParseMediaContent)
 		if err != nil {
 			return nil, err
 		}
 
-		for i := 0; i < len(data.N); i++ {
-			subs := re.FindStringSubmatch(data.N[i].Description)
-			data.N[i].MediaContent.Src = subs[1]
-			data.N[i].Description = re.ReplaceAllString(data.N[i].Description, "")
+		pubTime, err := parseUnixTime(val.PubDate, namedTimezone)
+		if err != nil {
+			return nil, err
+		}
+
+		n := news.News{
+			Title:        val.Title,
+			MediaContent: val.MediaContent.Src,
+			Url:          val.Url,
+			Description:  val.Description,
+			PubDate:      pubTime,
+		}
+
+		results = append(results, n)
+	}
+
+	return results, nil
+}
+
+func cleanData(val *newsResult, mustParseMediaContent bool) error {
+	if mustParseMediaContent {
+		err := parseMediaContent(val)
+		if err != nil {
+			return err
 		}
 	}
 
-	return data.N, nil
+	val.Description = html.UnescapeString(val.Description)
+
+	return nil
+}
+
+func parseMediaContent(val *newsResult) error {
+	re, err := regexp.Compile(`<img src=\"([a-z0-9A-Z:\/\-._]+).*/?>`)
+	if err != nil {
+		return err
+	}
+
+	subs := re.FindStringSubmatch(val.Description)
+	val.MediaContent.Src = subs[1]
+	val.Description = re.ReplaceAllString(val.Description, "")
+
+	return nil
+}
+
+func parseUnixTime(timeValue string, namedTimezone bool) (int64, error) {
+	var layout string
+	if namedTimezone {
+		layout = time.RFC1123
+	} else {
+		layout = time.RFC1123Z
+	}
+
+	parsedTime, err := time.Parse(layout, timeValue)
+	if err != nil {
+		return 0, err
+	}
+
+	return parsedTime.Unix(), nil
 }
