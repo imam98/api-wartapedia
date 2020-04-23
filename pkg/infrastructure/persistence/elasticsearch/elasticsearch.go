@@ -1,13 +1,14 @@
 package elasticsearch
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/imam98/api-wartapedia/pkg/news"
+	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type repository struct {
@@ -20,6 +21,22 @@ type Config struct {
 	IndexName string
 }
 
+const searchAll = `
+	"query": { "match_all": {} },
+	"size": %d,
+	"sort": { "pub_date": "desc" }`
+
+const searchQuery = `
+	"query": {
+		"multi_match": {
+			"query": %q,
+			"fields": ["title", "description"],
+			"operator": "or"
+		}
+	},
+	"size": %d,
+	"sort": { "_score": "asc", "pub_date": "desc" }`
+
 func NewRepository(config Config) *repository {
 	return &repository{client: config.Client, indexName: config.IndexName}
 }
@@ -28,16 +45,54 @@ func (r *repository) Store(news news.News) error {
 	return nil
 }
 
-func (r *repository) FindByQuery(query string) ([]news.News, error) {
-	return nil, nil
+func (r *repository) FindByQuery(query string, limit int) ([]news.News, error) {
+	resp, err := r.client.Search(
+		r.client.Search.WithBody(matchQueryBuilder(query, limit)),
+		r.client.Search.WithPretty(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := jsonparser.GetInt(data, "hits", "total", "value")
+	if err != nil {
+		return nil, err
+	}
+	if total == 0 {
+		return []news.News{}, nil
+	}
+
+	var result []news.News
+	var innerErr error = nil
+	_, err = jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		var n news.News
+
+		srcObj, _, _, err := jsonparser.Get(value, "_source")
+		if err != nil {
+			innerErr = err
+			return
+		}
+		json.Unmarshal(srcObj, &n)
+		result = append(result, n)
+	}, "hits", "hits")
+	if err != nil {
+		return nil, err
+	}
+	if innerErr != nil {
+		return nil, innerErr
+	}
+
+	return result, nil
 }
 
 func (r *repository) Find(key string) (news.News, error) {
-	resp, err := esapi.GetRequest{
-		Index:      r.indexName,
-		DocumentID: key,
-		Pretty:     true,
-	}.Do(context.Background(), r.client)
+	resp, err := r.client.Get(r.indexName, key, r.client.Get.WithPretty())
 	if err != nil {
 		return news.News{}, err
 	}
@@ -65,4 +120,18 @@ func (r *repository) Find(key string) (news.News, error) {
 	json.Unmarshal(srcObj, &newsData)
 
 	return newsData, nil
+}
+
+func matchQueryBuilder(query string, limit int) io.Reader {
+	var sb strings.Builder
+
+	sb.WriteString("{\n")
+	if query == "" {
+		sb.WriteString(fmt.Sprintf(searchAll, limit))
+	} else {
+		sb.WriteString(fmt.Sprintf(searchQuery, query, limit))
+	}
+	sb.WriteString("\n}")
+
+	return strings.NewReader(sb.String())
 }

@@ -3,7 +3,7 @@ package querying
 import "github.com/imam98/api-wartapedia/pkg/news"
 
 type Repository interface {
-	FindByQuery(query string) ([]news.News, error)
+	FindByQuery(query string, limit int) ([]news.News, error)
 }
 
 type querying struct {

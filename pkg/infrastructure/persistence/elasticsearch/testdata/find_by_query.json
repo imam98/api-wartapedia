@@ -1,0 +1,58 @@
+{
+  "took": 12,
+  "timed_out": false,
+  "hits": {
+    "total": {
+      "value": 3,
+      "relation": "eq"
+    },
+    "max_score": 1.0,
+    "hits": [
+      {
+        "_index": "testing",
+        "_type": "_doc",
+        "_id": "abc:123",
+        "_score": 1.0,
+        "_source": {
+          "id": "abc:123",
+          "source": "abc",
+          "title":"Dummy Title",
+          "media_content":"http://dummy.jpg",
+          "url":"http://dummy.id",
+          "description":"Dummy description",
+          "pub_date":1585901013
+        }
+      },
+      {
+        "_index": "testing",
+        "_type": "_doc",
+        "_id": "abc:234",
+        "_score": 1.0,
+        "_source": {
+          "id": "abc:234",
+          "source": "abc",
+          "title":"Dummy Title",
+          "media_content":"http://dummy.jpg",
+          "url":"http://dummy.id",
+          "description":"Dummy description",
+          "pub_date":1585901013
+        }
+      },
+      {
+        "_index": "testing",
+        "_type": "_doc",
+        "_id": "abc:456",
+        "_score": 1.0,
+        "_source": {
+          "id": "abc:456",
+          "source": "abc",
+          "title":"Dummy Title",
+          "media_content":"http://dummy.jpg",
+          "url":"http://dummy.id",
+          "description":"Dummy description",
+          "pub_date":1585901013
+        }
+      }
+    ]
+  }
+}
