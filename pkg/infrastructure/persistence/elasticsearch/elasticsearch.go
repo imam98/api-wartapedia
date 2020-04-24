@@ -1,6 +1,7 @@
 package elasticsearch
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/buger/jsonparser"
@@ -8,6 +9,7 @@ import (
 	"github.com/imam98/api-wartapedia/pkg/news"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"strings"
 )
 
@@ -41,7 +43,24 @@ func NewRepository(config Config) *repository {
 	return &repository{client: config.Client, indexName: config.IndexName}
 }
 
-func (r *repository) Store(news news.News) error {
+func (r *repository) Store(val news.News) error {
+	resp, err := r.client.Exists(r.indexName, val.ID)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == http.StatusOK {
+		return news.ErrItemDuplicate
+	}
+
+	payload, err := json.Marshal(val)
+	if err != nil {
+		return err
+	}
+
+	if _, err := r.client.Create(r.indexName, val.ID, bytes.NewReader(payload)); err != nil {
+		return err
+	}
+
 	return nil
 }
 

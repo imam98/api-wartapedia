@@ -229,6 +229,58 @@ func TestFindByQuery(t *testing.T) {
 	})
 }
 
+func TestStore(t *testing.T) {
+	ft := &fakeTransport{
+		Response: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       fixture("store_success.json"),
+		},
+	}
+	ft.RoundTripFn = func(req *http.Request) (*http.Response, error) {
+		method := req.Method
+		path := strings.Split(req.URL.Path, "/")
+		docId := path[len(path)-1]
+		if method == "HEAD" {
+			if docId != "abc:123" {
+				return &http.Response{StatusCode: http.StatusOK}, nil
+			} else {
+				return &http.Response{StatusCode: http.StatusNotFound}, nil
+			}
+		}
+
+		return ft.Response, nil
+	}
+
+	client, err := es.NewClient(es.Config{
+		Transport: ft,
+	})
+	assertError(t, nil, err)
+
+	repo := NewRepository(Config{
+		Client:    client,
+		IndexName: "testing",
+	})
+
+	t.Run("Store success", func(t *testing.T) {
+		given := news.News{
+			ID:           "abc:123",
+			Source:       "abc",
+			Title:        "Dummy Title",
+			MediaContent: "http://dummy.jpg",
+			Url:          "http://dummy.id",
+			Description:  "Dummy description",
+			PubDate:      1585901013,
+		}
+		assertError(t, nil, repo.Store(given))
+	})
+
+	t.Run("Store duplicate", func(t *testing.T) {
+		given := news.News{ID: "abc:234"}
+		expected := news.ErrItemDuplicate
+		assertError(t, expected, repo.Store(given))
+	})
+}
+
 func assertError(t *testing.T, expected error, got error) {
 	t.Helper()
 
