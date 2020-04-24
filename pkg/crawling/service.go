@@ -4,6 +4,7 @@ import (
 	"github.com/imam98/api-wartapedia/pkg/news"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type NewsFetcher interface {
@@ -39,7 +40,8 @@ func (c *crawling) Crawl(flags news.RepoFlag) error {
 	}
 
 	for _, val := range data {
-		if _, err := c.repo.Find(val.ID); err == nil {
+		pubdate := time.Unix(val.PubDate, 0)
+		if time.Now().Sub(pubdate).Hours() > 24 {
 			break
 		}
 
@@ -47,7 +49,11 @@ func (c *crawling) Crawl(flags news.RepoFlag) error {
 		prefix := parsePrefixFromFlags(flags)
 		val.ID = genDocID(prefix, val.Url)
 		if err := c.repo.Store(val); err != nil {
-			return err
+			if err == news.ErrItemDuplicate {
+				break
+			} else {
+				return err
+			}
 		}
 	}
 
