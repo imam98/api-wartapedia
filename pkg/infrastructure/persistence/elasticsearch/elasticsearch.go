@@ -46,6 +46,11 @@ func NewRepository(config Config) *repository {
 
 func (r *repository) Store(val news.News) error {
 	pubdate := time.Unix(val.PubDate, 0)
+	expirationDate := time.Now().AddDate(0, 0, -2)
+	if pubdate.Equal(expirationDate) || pubdate.Before(expirationDate) {
+		return news.ErrItemExpired
+	}
+
 	indexName := fmt.Sprintf("%s-%s", r.indexName, pubdate.Format("02-01-2006"))
 	resp, err := r.client.Exists(indexName, val.ID)
 	if err != nil {
