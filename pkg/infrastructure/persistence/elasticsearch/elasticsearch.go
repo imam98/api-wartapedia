@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type repository struct {
@@ -44,7 +45,9 @@ func NewRepository(config Config) *repository {
 }
 
 func (r *repository) Store(val news.News) error {
-	resp, err := r.client.Exists(r.indexName, val.ID)
+	pubdate := time.Unix(val.PubDate, 0)
+	indexName := fmt.Sprintf("%s-%s", r.indexName, pubdate.Format("02-01-2006"))
+	resp, err := r.client.Exists(indexName, val.ID)
 	if err != nil {
 		return err
 	}
@@ -59,6 +62,27 @@ func (r *repository) Store(val news.News) error {
 
 	if _, err := r.client.Create(r.indexName, val.ID, bytes.NewReader(payload)); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *repository) DeleteExpiredIndex() error {
+	estimatedDate := time.Now().AddDate(0, 0, -2)
+	indexName := fmt.Sprintf("%s-%s", r.indexName, estimatedDate.Format("02-01-2006"))
+	resp, err := r.client.Indices.Delete([]string{indexName})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		reason, _ := jsonparser.GetString(data, "error", "reason")
+		return fmt.Errorf("error: %s", reason)
 	}
 
 	return nil
