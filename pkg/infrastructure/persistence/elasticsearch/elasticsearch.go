@@ -47,7 +47,7 @@ func NewRepository(config Config) *repository {
 func (r *repository) Store(val news.News) error {
 	pubdate := time.Unix(val.PubDate, 0)
 	expirationDate := time.Now().AddDate(0, 0, -2)
-	if pubdate.Equal(expirationDate) || pubdate.Before(expirationDate) {
+	if pubdate.YearDay() <= expirationDate.YearDay() && pubdate.Year() <= expirationDate.Year() {
 		return news.ErrItemExpired
 	}
 
@@ -65,7 +65,7 @@ func (r *repository) Store(val news.News) error {
 		return err
 	}
 
-	if _, err := r.client.Create(r.indexName, val.ID, bytes.NewReader(payload)); err != nil {
+	if _, err := r.client.Create(indexName, val.ID, bytes.NewReader(payload)); err != nil {
 		return err
 	}
 

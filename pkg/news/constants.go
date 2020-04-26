@@ -53,6 +53,19 @@ func (r RepoFlag) Validate() bool {
 	return ok
 }
 
+func (r RepoFlag) CategoryString() string {
+	switch r.CategoryOnly() {
+	case CAT_NASIONAL:
+		return "Nasional"
+	case CAT_DUNIA:
+		return "Dunia"
+	case CAT_TEKNO:
+		return "Tekno"
+	default:
+		return "-"
+	}
+}
+
 func (r RepoFlag) SourceString() string {
 	switch r.SourceOnly() {
 	case ANTARANEWS:
