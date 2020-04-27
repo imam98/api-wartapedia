@@ -16,8 +16,8 @@ func NewService(repo Repository) *querying {
 	}
 }
 
-func (q *querying) Query(query string) ([]news.News, error) {
-	data, err := q.repo.FindByQuery(query)
+func (q *querying) Query(query string, limit int) ([]news.News, error) {
+	data, err := q.repo.FindByQuery(query, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/gorilla/mux"
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/news_fetcher"
+	"github.com/imam98/api-wartapedia/pkg/infrastructure/persistence/elasticsearch"
 	"github.com/imam98/api-wartapedia/pkg/listing"
 	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/querying"
 	"github.com/rs/zerolog"
 	"net/http"
 	"os"
@@ -76,15 +79,50 @@ func main() {
 	}
 	logger := zerolog.New(output).With().Timestamp().Logger()
 
+	esClient, err := es.NewDefaultClient()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to create es client")
+	}
+	repo := elasticsearch.NewRepository(elasticsearch.Config{
+		Client:    esClient,
+		IndexName: "wartapedia",
+	})
+	queryer := querying.NewService(repo)
+
 	r := mux.NewRouter()
 	r.HandleFunc("/api/news", newsHandler)
 	r.HandleFunc("/api/list/source", sourceListHandler)
+	r.HandleFunc("/api/search", searchQueryHandler(queryer))
 	handler := http.Handler(r)
-	handler = checkQueryString(handler, logger)
-	handler = allowOnlyGet(handler, logger)
+	handler = checkQueryString(handler)
+	handler = allowOnlyGet(handler)
 
 	logger.Info().Msg("Service listening to port 3000")
 	http.ListenAndServe(":3000", handler)
+}
+
+func searchQueryHandler(service news.QueryService) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		encoder := json.NewEncoder(w)
+		w.Header().Set("content-type", "application/json")
+
+		q := r.URL.Query()
+		searchQuery := q.Get("q")
+		results, err := service.Query(searchQuery, 50)
+		if err != nil {
+			handleError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		resp := response{
+			Status: http.StatusOK,
+			Data:   results,
+		}
+		if err := encoder.Encode(resp); err != nil {
+			handleError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
 }
 
 func genRepoFlags(category, source string) news.RepoFlag {
@@ -127,4 +165,20 @@ func handleError(w http.ResponseWriter, status int, message string) {
 
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(responseErr)
+}
+
+func makeLog(req *http.Request) *zerolog.Logger {
+	output := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC822Z,
+	}
+	logger := zerolog.New(output).With().
+		Timestamp().
+		Str("method", req.Method).
+		Str("uri", req.URL.String()).
+		Str("ip", req.RemoteAddr).
+		Str("referer", req.Referer()).
+		Logger()
+
+	return &logger
 }

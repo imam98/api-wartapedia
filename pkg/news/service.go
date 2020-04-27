@@ -6,7 +6,7 @@ type ListerService interface {
 }
 
 type QueryService interface {
-	Query(query string) ([]News, error)
+	Query(query string, limit int) ([]News, error)
 }
 
 type CrawlerService interface {
