@@ -45,8 +45,9 @@ func NewRepository(config Config) *repository {
 }
 
 func (r *repository) Store(val news.News) error {
-	pubdate := time.Unix(val.PubDate, 0)
-	expirationDate := time.Now().AddDate(0, 0, -2)
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	pubdate := time.Unix(val.PubDate, 0).In(loc)
+	expirationDate := time.Now().In(loc).AddDate(0, 0, -2)
 	if pubdate.YearDay() <= expirationDate.YearDay() && pubdate.Year() <= expirationDate.Year() {
 		return news.ErrItemExpired
 	}
@@ -73,7 +74,8 @@ func (r *repository) Store(val news.News) error {
 }
 
 func (r *repository) DeleteExpiredIndex() error {
-	estimatedDate := time.Now().AddDate(0, 0, -2)
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	estimatedDate := time.Now().In(loc).AddDate(0, 0, -2)
 	indexName := fmt.Sprintf("%s-%s", r.indexName, estimatedDate.Format("02-01-2006"))
 	resp, err := r.client.Indices.Delete([]string{indexName})
 	if err != nil {
