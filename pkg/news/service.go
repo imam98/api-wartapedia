@@ -12,3 +12,7 @@ type QueryService interface {
 type CrawlerService interface {
 	Crawl(flags RepoFlag) error
 }
+
+type DeleterDaemonService interface {
+	Start() error
+}

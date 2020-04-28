@@ -88,6 +88,10 @@ func (r *repository) DeleteExpiredIndex() error {
 		return err
 	}
 	if resp.IsError() {
+		errType, _ := jsonparser.GetString(data, "error", "type")
+		if errType == "index_not_found_exception" {
+			return news.ErrItemNotFound
+		}
 		reason, _ := jsonparser.GetString(data, "error", "reason")
 		return fmt.Errorf("error: %s", reason)
 	}
