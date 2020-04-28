@@ -34,8 +34,9 @@ var Sources = map[RepoFlag]string{
 }
 
 var (
-	ErrItemNotFound  = errors.New("Error item not found")
-	ErrItemDuplicate = errors.New("Error item already exists")
+	ErrItemNotFound   = errors.New("Error item not found")
+	ErrItemDuplicate  = errors.New("Error item already exists")
+	ErrItemExpired    = errors.New("the item is within expiration date")
 	ErrSourceNotFound = errors.New("the source flag is not registered in the sourcelist")
 )
 
@@ -50,6 +51,19 @@ func (r RepoFlag) CategoryOnly() RepoFlag {
 func (r RepoFlag) Validate() bool {
 	_, ok := Sources[r]
 	return ok
+}
+
+func (r RepoFlag) CategoryString() string {
+	switch r.CategoryOnly() {
+	case CAT_NASIONAL:
+		return "Nasional"
+	case CAT_DUNIA:
+		return "Dunia"
+	case CAT_TEKNO:
+		return "Tekno"
+	default:
+		return "-"
+	}
 }
 
 func (r RepoFlag) SourceString() string {

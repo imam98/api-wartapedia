@@ -232,24 +232,24 @@ func TestBBCNewsFetcher(t *testing.T) {
 			Title:       "Virus corona: Mengapa Indonesia 'tidak terbuka', sementara negara lain bersikap 'transparan'?",
 			Url:         "http://www.bbc.com/indonesia/indonesia-51842758",
 			Description: "Dummy description",
-			PubDate:     "Thu, 12 Mar 2020 04:40:23 GMT",
+			PubDate:     1583988023,
 		},
 		news.News{
 			Title:       "Sejarah bulu tangkis di Olimpiade: Mengapa Indonesia sulit lahirkan Susy Susanti generasi baru?",
 			Url:         "http://www.bbc.com/indonesia/olahraga-51662063",
 			Description: "Dummy description",
-			PubDate:     "Thu, 12 Mar 2020 02:42:21 GMT",
+			PubDate:     1583980941,
 		},
 		news.News{
 			Title:       "Virus corona: Karyawan apresiasi pembebasan pajak penghasilan, ekonom sebut 'perlu stimulus fiskal dan moneter' atasi perlambatan ekonomi",
 			Url:         "http://www.bbc.com/indonesia/indonesia-51830029",
 			Description: "Dummy description",
-			PubDate:     "Thu, 12 Mar 2020 01:21:54 GMT",
+			PubDate:     1583976114,
 		},
 	}
 
 	fetcher := NewFetcher()
-	data, err := fetcher.Fetch(server.URL)
+	data, err := fetcher.Fetch(fmt.Sprintf("%s/bbc", server.URL))
 	if err != nil {
 		t.Fatalf("Error occured: %q", err)
 	}
@@ -266,23 +266,23 @@ func TestAntaraNewsFetcher(t *testing.T) {
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
-			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
-			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
+			PubDate:      1584262264,
 		},
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah",
-			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
-			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
+			PubDate:      1584262264,
 		},
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah",
-			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
-			PubDate:      "Sun, 15 Mar 2020 15:51:04 +0700",
+			PubDate:      1584262264,
 		},
 	}
 
@@ -305,9 +305,9 @@ func TestDetikNewsFetcher(t *testing.T) {
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
-			MediaContent: news.Media{Src: "https://dummy.jpeg"},
+			MediaContent: "https://dummy.jpeg",
 			Description:  "\"Dummy description\"",
-			PubDate:      "Sun, 15 Mar 2020 18:34:46 +0700",
+			PubDate:      1584272086,
 		},
 	}
 
@@ -330,9 +330,9 @@ func TestOkezoneNewsFetcher(t *testing.T) {
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik",
-			MediaContent: news.Media{Src: "https://dummy.jpg?w=300"},
+			MediaContent: "https://dummy.jpg?w=300",
 			Description:  "Dummy description",
-			PubDate:      "Mon, 16 Mar 2020 13:53:18 +0700",
+			PubDate:      1584341598,
 		},
 	}
 
@@ -354,9 +354,9 @@ func TestRepublikaNewsFetcher(t *testing.T) {
 		news.News{
 			Title:        "Dummy Title",
 			Url:          "https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi",
-			MediaContent: news.Media{Src: "https://dummy.jpg"},
+			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
-			PubDate:      "Mon, 16 Mar 2020 14:29:53 +0700",
+			PubDate:      1584343793,
 		},
 	}
 
@@ -385,8 +385,8 @@ func assertElements(t *testing.T, expected []news.News, got []news.News) {
 			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.Title, got[index].Title)
 		}
 
-		if val.MediaContent.Src != got[index].MediaContent.Src {
-			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.MediaContent.Src, got[index].MediaContent.Src)
+		if val.MediaContent != got[index].MediaContent {
+			t.Errorf("Struct value doesn't match!\nExpected: %v\nGot: %v\n", val.MediaContent, got[index].MediaContent)
 		}
 
 		if val.Description != got[index].Description {

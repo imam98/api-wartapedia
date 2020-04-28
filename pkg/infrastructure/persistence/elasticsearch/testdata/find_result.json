@@ -1,0 +1,18 @@
+{
+  "_index": "testing",
+  "_type": "_doc",
+  "_id": "abc:123",
+  "_version": 3,
+  "_seq_no": 10,
+  "_primary_term": 3,
+  "found": true,
+  "_source": {
+    "id": "abc:123",
+    "source": "abc",
+    "title":"Dummy Title",
+    "media_content":"http://dummy.jpg",
+    "url":"http://dummy.id",
+    "description":"Dummy description",
+    "pub_date":1585901013
+  }
+}
