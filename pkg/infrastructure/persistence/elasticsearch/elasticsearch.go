@@ -17,11 +17,13 @@ import (
 type repository struct {
 	client    *elasticsearch.Client
 	indexName string
+	timeLoc *time.Location
 }
 
 type Config struct {
 	Client    *elasticsearch.Client
 	IndexName string
+	TimeLoc *time.Location
 }
 
 const searchAll = `
@@ -41,13 +43,20 @@ const searchQuery = `
 	"sort": { "_score": "asc", "pub_date": "desc" }`
 
 func NewRepository(config Config) *repository {
-	return &repository{client: config.Client, indexName: config.IndexName}
+	if config.TimeLoc == nil {
+		config.TimeLoc, _ = time.LoadLocation("Asia/Jakarta")
+	}
+
+	return &repository{
+		client: config.Client,
+		indexName: config.IndexName,
+		timeLoc: config.TimeLoc,
+	}
 }
 
 func (r *repository) Store(val news.News) error {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-	pubdate := time.Unix(val.PubDate, 0).In(loc)
-	expirationDate := time.Now().In(loc).AddDate(0, 0, -2)
+	pubdate := time.Unix(val.PubDate, 0).In(r.timeLoc)
+	expirationDate := time.Now().In(r.timeLoc).AddDate(0, 0, -2)
 	if pubdate.YearDay() <= expirationDate.YearDay() && pubdate.Year() <= expirationDate.Year() {
 		return news.ErrItemExpired
 	}
@@ -74,8 +83,7 @@ func (r *repository) Store(val news.News) error {
 }
 
 func (r *repository) DeleteExpiredIndex() error {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-	estimatedDate := time.Now().In(loc).AddDate(0, 0, -2)
+	estimatedDate := time.Now().In(r.timeLoc).AddDate(0, 0, -2)
 	indexName := fmt.Sprintf("%s-%s", r.indexName, estimatedDate.Format("02-01-2006"))
 	resp, err := r.client.Indices.Delete([]string{indexName})
 	if err != nil {

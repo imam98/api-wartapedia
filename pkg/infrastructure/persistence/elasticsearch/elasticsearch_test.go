@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
@@ -57,13 +58,16 @@ func (ft *fakeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func TestNewRepository(t *testing.T) {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	given := Config{
 		Client:    nil,
 		IndexName: "",
+		TimeLoc:   loc,
 	}
 	expected := &repository{
 		client:    nil,
 		indexName: "",
+		timeLoc:   loc,
 	}
 
 	got := NewRepository(given)
@@ -269,13 +273,13 @@ func TestStore(t *testing.T) {
 			MediaContent: "http://dummy.jpg",
 			Url:          "http://dummy.id",
 			Description:  "Dummy description",
-			PubDate:      1585901013,
+			PubDate:      time.Now().Unix(),
 		}
 		assertError(t, nil, repo.Store(given))
 	})
 
 	t.Run("Store duplicate", func(t *testing.T) {
-		given := news.News{ID: "abc:234"}
+		given := news.News{ID: "abc:234", PubDate: time.Now().Unix()}
 		expected := news.ErrItemDuplicate
 		assertError(t, expected, repo.Store(given))
 	})
