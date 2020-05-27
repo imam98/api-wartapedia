@@ -17,13 +17,13 @@ import (
 type repository struct {
 	client    *elasticsearch.Client
 	indexName string
-	timeLoc *time.Location
+	timeLoc   *time.Location
 }
 
 type Config struct {
 	Client    *elasticsearch.Client
 	IndexName string
-	TimeLoc *time.Location
+	TimeLoc   *time.Location
 }
 
 const searchAll = `
@@ -48,9 +48,9 @@ func NewRepository(config Config) *repository {
 	}
 
 	return &repository{
-		client: config.Client,
+		client:    config.Client,
 		indexName: config.IndexName,
-		timeLoc: config.TimeLoc,
+		timeLoc:   config.TimeLoc,
 	}
 }
 
@@ -75,9 +75,11 @@ func (r *repository) Store(val news.News) error {
 		return err
 	}
 
-	if _, err := r.client.Create(indexName, val.ID, bytes.NewReader(payload)); err != nil {
+	resp, err = r.client.Create(indexName, val.ID, bytes.NewReader(payload))
+	if err != nil {
 		return err
 	}
+	resp.Body.Close()
 
 	return nil
 }
