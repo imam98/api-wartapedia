@@ -91,7 +91,7 @@ func main() {
 	queryer := querying.NewService(repo)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api/domain", newsHandler)
+	r.HandleFunc("/api/news", newsHandler)
 	r.HandleFunc("/api/list/source", sourceListHandler)
 	r.HandleFunc("/api/search", searchQueryHandler(queryer))
 	handler := http.Handler(r)

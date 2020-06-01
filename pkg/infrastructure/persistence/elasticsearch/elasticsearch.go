@@ -41,7 +41,7 @@ const searchQuery = `
 		}
 	},
 	"size": %d,
-	"sort": { "_score": "asc", "pub_date": "desc" }`
+	"sort": { "_score": "desc", "pub_date": "desc" }`
 
 func NewRepository(config Config) *repository {
 	if config.TimeLoc == nil {
