@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/buger/jsonparser"
 	es "github.com/elastic/go-elasticsearch/v8"
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -109,7 +110,7 @@ func TestFind(t *testing.T) {
 	})
 
 	t.Run("Document exists", func(t *testing.T) {
-		expected := news.News{
+		expected := entity.News{
 			ID:           "abc:123",
 			Source:       "abc",
 			Title:        "Dummy Title",
@@ -130,7 +131,7 @@ func TestFind(t *testing.T) {
 	})
 
 	t.Run("Document not exists", func(t *testing.T) {
-		expected := news.ErrItemNotFound
+		expected := domain.ErrItemNotFound
 		_, got := repo.Find("abc:235")
 		if got == nil {
 			t.Error("Expect to get error, got no error")
@@ -179,8 +180,8 @@ func TestFindByQuery(t *testing.T) {
 	})
 
 	t.Run("Query found", func(t *testing.T) {
-		expected := []news.News{
-			news.News{
+		expected := []entity.News{
+			entity.News{
 				ID:           "abc:123",
 				Source:       "abc",
 				Title:        "Dummy Title",
@@ -189,7 +190,7 @@ func TestFindByQuery(t *testing.T) {
 				Description:  "Dummy description",
 				PubDate:      1585901013,
 			},
-			news.News{
+			entity.News{
 				ID:           "abc:234",
 				Source:       "abc",
 				Title:        "Dummy Title",
@@ -198,7 +199,7 @@ func TestFindByQuery(t *testing.T) {
 				Description:  "Dummy description",
 				PubDate:      1585901013,
 			},
-			news.News{
+			entity.News{
 				ID:           "abc:456",
 				Source:       "abc",
 				Title:        "Dummy Title",
@@ -266,7 +267,7 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("Store success", func(t *testing.T) {
-		given := news.News{
+		given := entity.News{
 			ID:           "abc:123",
 			Source:       "abc",
 			Title:        "Dummy Title",
@@ -279,8 +280,8 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("Store duplicate", func(t *testing.T) {
-		given := news.News{ID: "abc:234", PubDate: time.Now().Unix()}
-		expected := news.ErrItemDuplicate
+		given := entity.News{ID: "abc:234", PubDate: time.Now().Unix()}
+		expected := domain.ErrItemDuplicate
 		assertError(t, expected, repo.Store(given))
 	})
 }

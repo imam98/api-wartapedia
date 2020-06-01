@@ -3,9 +3,9 @@ package main
 import (
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/imam98/api-wartapedia/pkg/crawling"
+	"github.com/imam98/api-wartapedia/pkg/domain"
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/news_fetcher"
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/persistence/elasticsearch"
-	"github.com/imam98/api-wartapedia/pkg/news"
 	"github.com/rs/zerolog"
 	"os"
 	"time"
@@ -31,8 +31,8 @@ func main() {
 	crawler := crawling.NewCrawler(repo, fetcher)
 
 	for {
-		for flags, _ := range news.Sources {
-			go func(f news.RepoFlag) {
+		for flags, _ := range domain.Sources {
+			go func(f domain.RepoFlag) {
 				logger.Info().
 					Str("source", f.SourceString()).
 					Str("category", f.CategoryString()).

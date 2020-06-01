@@ -1,9 +1,11 @@
 package querying
 
-import "github.com/imam98/api-wartapedia/pkg/news"
+import (
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
+)
 
 type Repository interface {
-	FindByQuery(query string, limit int) ([]news.News, error)
+	FindByQuery(query string, limit int) ([]entity.News, error)
 }
 
 type querying struct {
@@ -16,7 +18,7 @@ func NewService(repo Repository) *querying {
 	}
 }
 
-func (q *querying) Query(query string, limit int) ([]news.News, error) {
+func (q *querying) Query(query string, limit int) ([]entity.News, error) {
 	data, err := q.repo.FindByQuery(query, limit)
 	if err != nil {
 		return nil, err

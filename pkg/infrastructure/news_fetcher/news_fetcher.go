@@ -2,7 +2,7 @@ package news_fetcher
 
 import (
 	"encoding/xml"
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"html"
 	"net/http"
 	"regexp"
@@ -32,8 +32,8 @@ func NewFetcher() *fetcher {
 	return &fetcher{}
 }
 
-func (f *fetcher) Fetch(url string) ([]news.News, error) {
-	var results []news.News
+func (f *fetcher) Fetch(url string) ([]entity.News, error) {
+	var results []entity.News
 	client := &http.Client{}
 
 	request, err := http.NewRequest("GET", url, nil)
@@ -73,7 +73,7 @@ func (f *fetcher) Fetch(url string) ([]news.News, error) {
 			return nil, err
 		}
 
-		n := news.News{
+		n := entity.News{
 			Title:        val.Title,
 			MediaContent: val.MediaContent.Src,
 			Url:          val.Url,

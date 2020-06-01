@@ -1,39 +1,39 @@
 package crawling
 
 import (
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
 	"testing"
 )
 
 func TestGenSource(t *testing.T) {
 	testcases := []struct {
 		name     string
-		given    news.RepoFlag
+		given    domain.RepoFlag
 		expected string
 	}{
 		{
 			name:     "Source: AntaraNews",
-			given:    news.CAT_NASIONAL | news.ANTARANEWS,
+			given:    domain.CAT_NASIONAL | domain.ANTARANEWS,
 			expected: "AntaraNews",
 		},
 		{
 			name:     "Source: BBC",
-			given:    news.CAT_NASIONAL | news.BBC,
+			given:    domain.CAT_NASIONAL | domain.BBC,
 			expected: "BBC",
 		},
 		{
 			name:     "Source: Detik",
-			given:    news.CAT_DUNIA | news.DETIK,
+			given:    domain.CAT_DUNIA | domain.DETIK,
 			expected: "Detik",
 		},
 		{
 			name:     "Source: Okezone",
-			given:    news.CAT_TEKNO | news.OKEZONE,
+			given:    domain.CAT_TEKNO | domain.OKEZONE,
 			expected: "Okezone",
 		},
 		{
 			name:     "Source: Republika",
-			given:    news.CAT_TEKNO | news.REPUBLIKA,
+			given:    domain.CAT_TEKNO | domain.REPUBLIKA,
 			expected: "Republika",
 		},
 	}
@@ -52,25 +52,25 @@ func TestGenDocID(t *testing.T) {
 	testcases := []struct {
 		name     string
 		given    string
-		flags    news.RepoFlag
+		flags    domain.RepoFlag
 		expected string
 	}{
 		{
 			name:     "Source: AntaraNews",
 			given:    "https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
-			flags:    news.CAT_NASIONAL | news.ANTARANEWS,
+			flags:    domain.CAT_NASIONAL | domain.ANTARANEWS,
 			expected: "atn::surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
 		},
 		{
 			name:     "Source: BBC",
 			given:    "http://www.bbc.com/indonesia/olahraga-51662063",
-			flags:    news.CAT_DUNIA | news.BBC,
+			flags:    domain.CAT_DUNIA | domain.BBC,
 			expected: "bbc::olahraga-51662063",
 		},
 		{
 			name:     "Source: Okezone",
 			given:    "https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik",
-			flags:    news.CAT_DUNIA | news.OKEZONE,
+			flags:    domain.CAT_DUNIA | domain.OKEZONE,
 			expected: "okz::cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik",
 		},
 	}

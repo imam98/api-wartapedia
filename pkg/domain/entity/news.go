@@ -1,4 +1,4 @@
-package news
+package entity
 
 type News struct {
 	ID           string `json:"id,omitempty"`

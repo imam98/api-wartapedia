@@ -2,12 +2,13 @@ package listing
 
 import (
 	"errors"
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"sort"
 )
 
 type NewsFetcher interface {
-	Fetch(url string) ([]news.News, error)
+	Fetch(url string) ([]entity.News, error)
 }
 
 type listing struct {
@@ -16,16 +17,16 @@ type listing struct {
 
 var ErrInvalidCategoryFlag = errors.New("category flag is invalid")
 
-func NewService(fetcher NewsFetcher) news.ListerService {
+func NewService(fetcher NewsFetcher) domain.ListerService {
 	return &listing{
 		nf: fetcher,
 	}
 }
 
-func (l *listing) GetNews(flags news.RepoFlag) ([]news.News, error) {
-	url, ok := news.Sources[flags]
+func (l *listing) GetNews(flags domain.RepoFlag) ([]entity.News, error) {
+	url, ok := domain.Sources[flags]
 	if !ok {
-		return nil, news.ErrSourceNotFound
+		return nil, domain.ErrSourceNotFound
 	}
 
 	data, err := l.nf.Fetch(url)
@@ -36,14 +37,14 @@ func (l *listing) GetNews(flags news.RepoFlag) ([]news.News, error) {
 	return data, nil
 }
 
-func (l *listing) GetSourcesFromCategory(catFlag news.RepoFlag) ([]string, error) {
+func (l *listing) GetSourcesFromCategory(catFlag domain.RepoFlag) ([]string, error) {
 	if catFlag.CategoryOnly() != catFlag {
 		return nil, ErrInvalidCategoryFlag
 	}
 
 	var sources []string
 	for i := 1; i <= 5; i++ {
-		flags := catFlag | news.RepoFlag(i)
+		flags := catFlag | domain.RepoFlag(i)
 		if flags.Validate() {
 			src := flags.SourceString()
 			sources = append(sources, src)

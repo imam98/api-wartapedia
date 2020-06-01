@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/gorilla/mux"
+	"github.com/imam98/api-wartapedia/pkg/domain"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/news_fetcher"
 	"github.com/imam98/api-wartapedia/pkg/infrastructure/persistence/elasticsearch"
 	"github.com/imam98/api-wartapedia/pkg/listing"
-	"github.com/imam98/api-wartapedia/pkg/news"
 	"github.com/imam98/api-wartapedia/pkg/querying"
 	"github.com/rs/zerolog"
 	"net/http"
@@ -16,9 +17,9 @@ import (
 )
 
 type response struct {
-	Status  int         `json:"status"`
-	Message string      `json:"message,omitempty"`
-	Data    []news.News `json:"data,omitempty"`
+	Status  int           `json:"status"`
+	Message string        `json:"message,omitempty"`
+	Data    []entity.News `json:"data,omitempty"`
 }
 
 func newsHandler(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +91,7 @@ func main() {
 	queryer := querying.NewService(repo)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api/news", newsHandler)
+	r.HandleFunc("/api/domain", newsHandler)
 	r.HandleFunc("/api/list/source", sourceListHandler)
 	r.HandleFunc("/api/search", searchQueryHandler(queryer))
 	handler := http.Handler(r)
@@ -101,7 +102,7 @@ func main() {
 	http.ListenAndServe(":3000", handler)
 }
 
-func searchQueryHandler(service news.QueryService) func(w http.ResponseWriter, r *http.Request) {
+func searchQueryHandler(service domain.QueryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		encoder := json.NewEncoder(w)
 		w.Header().Set("content-type", "application/json")
@@ -125,33 +126,33 @@ func searchQueryHandler(service news.QueryService) func(w http.ResponseWriter, r
 	}
 }
 
-func genRepoFlags(category, source string) news.RepoFlag {
-	var catFlag news.RepoFlag
+func genRepoFlags(category, source string) domain.RepoFlag {
+	var catFlag domain.RepoFlag
 	switch category {
 	case "nasional":
-		catFlag = news.CAT_NASIONAL
+		catFlag = domain.CAT_NASIONAL
 	case "dunia":
-		catFlag = news.CAT_DUNIA
+		catFlag = domain.CAT_DUNIA
 	case "tekno":
-		catFlag = news.CAT_TEKNO
+		catFlag = domain.CAT_TEKNO
 	default:
-		catFlag = news.RepoFlag(0)
+		catFlag = domain.RepoFlag(0)
 	}
 
-	var srcFlag news.RepoFlag
+	var srcFlag domain.RepoFlag
 	switch source {
 	case "antaranews":
-		srcFlag = news.ANTARANEWS
+		srcFlag = domain.ANTARANEWS
 	case "bbc":
-		srcFlag = news.BBC
+		srcFlag = domain.BBC
 	case "detik":
-		srcFlag = news.DETIK
+		srcFlag = domain.DETIK
 	case "okezone":
-		srcFlag = news.OKEZONE
+		srcFlag = domain.OKEZONE
 	case "republika":
-		srcFlag = news.REPUBLIKA
+		srcFlag = domain.REPUBLIKA
 	default:
-		srcFlag = news.RepoFlag(0)
+		srcFlag = domain.RepoFlag(0)
 	}
 
 	return catFlag | srcFlag

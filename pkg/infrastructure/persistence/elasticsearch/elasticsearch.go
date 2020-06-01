@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -54,11 +55,11 @@ func NewRepository(config Config) *repository {
 	}
 }
 
-func (r *repository) Store(val news.News) error {
+func (r *repository) Store(val entity.News) error {
 	pubdate := time.Unix(val.PubDate, 0).In(r.timeLoc)
 	expirationDate := time.Now().In(r.timeLoc).AddDate(0, 0, -2)
 	if pubdate.YearDay() <= expirationDate.YearDay() && pubdate.Year() <= expirationDate.Year() {
-		return news.ErrItemExpired
+		return domain.ErrItemExpired
 	}
 
 	indexName := fmt.Sprintf("%s-%s", r.indexName, pubdate.Format("02-01-2006"))
@@ -67,7 +68,7 @@ func (r *repository) Store(val news.News) error {
 		return err
 	}
 	if resp.StatusCode == http.StatusOK {
-		return news.ErrItemDuplicate
+		return domain.ErrItemDuplicate
 	}
 
 	payload, err := json.Marshal(val)
@@ -100,7 +101,7 @@ func (r *repository) DeleteExpiredIndex() error {
 	if resp.IsError() {
 		errType, _ := jsonparser.GetString(data, "error", "type")
 		if errType == "index_not_found_exception" {
-			return news.ErrItemNotFound
+			return domain.ErrItemNotFound
 		}
 		reason, _ := jsonparser.GetString(data, "error", "reason")
 		return fmt.Errorf("error: %s", reason)
@@ -109,7 +110,7 @@ func (r *repository) DeleteExpiredIndex() error {
 	return nil
 }
 
-func (r *repository) FindByQuery(query string, limit int) ([]news.News, error) {
+func (r *repository) FindByQuery(query string, limit int) ([]entity.News, error) {
 	resp, err := r.client.Search(
 		r.client.Search.WithBody(matchQueryBuilder(query, limit)),
 		r.client.Search.WithPretty(),
@@ -129,13 +130,13 @@ func (r *repository) FindByQuery(query string, limit int) ([]news.News, error) {
 		return nil, err
 	}
 	if total == 0 {
-		return []news.News{}, nil
+		return []entity.News{}, nil
 	}
 
-	var result []news.News
+	var result []entity.News
 	var innerErr error = nil
 	_, err = jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-		var n news.News
+		var n entity.News
 
 		srcObj, _, _, err := jsonparser.Get(value, "_source")
 		if err != nil {
@@ -155,32 +156,32 @@ func (r *repository) FindByQuery(query string, limit int) ([]news.News, error) {
 	return result, nil
 }
 
-func (r *repository) Find(key string) (news.News, error) {
+func (r *repository) Find(key string) (entity.News, error) {
 	resp, err := r.client.Get(r.indexName, key, r.client.Get.WithPretty())
 	if err != nil {
-		return news.News{}, err
+		return entity.News{}, err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return news.News{}, err
+		return entity.News{}, err
 	}
 
 	isFound, err := jsonparser.GetBoolean(data, "found")
 	if err != nil {
-		return news.News{}, err
+		return entity.News{}, err
 	}
 	if !isFound {
-		return news.News{}, news.ErrItemNotFound
+		return entity.News{}, domain.ErrItemNotFound
 	}
 
 	srcObj, _, _, err := jsonparser.Get(data, "_source")
 	if err != nil {
-		return news.News{}, nil
+		return entity.News{}, nil
 	}
 
-	var newsData news.News
+	var newsData entity.News
 	json.Unmarshal(srcObj, &newsData)
 
 	return newsData, nil

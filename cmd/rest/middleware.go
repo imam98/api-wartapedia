@@ -24,7 +24,7 @@ func checkQueryString(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		w.Header().Set("Content-Type", "application/json")
-		if r.URL.Path == "/api/news" {
+		if r.URL.Path == "/api/domain" {
 			if q.Get("cat") == "" || q.Get("src") == "" {
 				handleError(w, http.StatusBadRequest, "Query params must not be empty")
 				makeLog(r).Error().

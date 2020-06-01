@@ -1,18 +1,19 @@
 package crawling
 
 import (
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"regexp"
 	"strings"
 )
 
 type NewsFetcher interface {
-	Fetch(url string) ([]news.News, error)
+	Fetch(url string) ([]entity.News, error)
 }
 
 type Repository interface {
-	Find(key string) (news.News, error)
-	Store(news news.News) error
+	Find(key string) (entity.News, error)
+	Store(news entity.News) error
 }
 
 type crawling struct {
@@ -27,10 +28,10 @@ func NewCrawler(repo Repository, fetcher NewsFetcher) *crawling {
 	}
 }
 
-func (c *crawling) Crawl(flags news.RepoFlag) error {
-	url, ok := news.Sources[flags]
+func (c *crawling) Crawl(flags domain.RepoFlag) error {
+	url, ok := domain.Sources[flags]
 	if !ok {
-		return news.ErrSourceNotFound
+		return domain.ErrSourceNotFound
 	}
 
 	data, err := c.nf.Fetch(url)
@@ -43,9 +44,9 @@ func (c *crawling) Crawl(flags news.RepoFlag) error {
 		prefix := parsePrefixFromFlags(flags)
 		val.ID = genDocID(prefix, val.Url)
 		if err := c.repo.Store(val); err != nil {
-			if err == news.ErrItemDuplicate {
+			if err == domain.ErrItemDuplicate {
 				break
-			} else if err == news.ErrItemExpired {
+			} else if err == domain.ErrItemExpired {
 				break
 			} else {
 				return err
@@ -56,17 +57,17 @@ func (c *crawling) Crawl(flags news.RepoFlag) error {
 	return nil
 }
 
-func parsePrefixFromFlags(flags news.RepoFlag) string {
+func parsePrefixFromFlags(flags domain.RepoFlag) string {
 	switch flags.SourceOnly() {
-	case news.ANTARANEWS:
+	case domain.ANTARANEWS:
 		return "atn"
-	case news.BBC:
+	case domain.BBC:
 		return "bbc"
-	case news.DETIK:
+	case domain.DETIK:
 		return "dtk"
-	case news.OKEZONE:
+	case domain.OKEZONE:
 		return "okz"
-	case news.REPUBLIKA:
+	case domain.REPUBLIKA:
 		return "rpb"
 	default:
 		return "-"

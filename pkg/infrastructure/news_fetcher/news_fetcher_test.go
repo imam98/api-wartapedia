@@ -2,7 +2,7 @@ package news_fetcher
 
 import (
 	"fmt"
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain/entity"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -103,18 +103,18 @@ func fakeDetikServer(w http.ResponseWriter, r *http.Request) {
 	<?xml version="1.0" encoding="UTF-8"?>
 	<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 		<channel>
-			<title>news.detik</title>
-			<link>http://news.detik.com/</link>
+			<title>domain.detik</title>
+			<link>http://domain.detik.com/</link>
 			<description>Detik.com sindikasi</description>
 			<image>
 				<title>detikNews - Berita</title>
-				<link>http://news.detik.com/</link>
+				<link>http://domain.detik.com/</link>
 				<url>http://rss.detik.com/images/rsslogo_detikcom.gif</url>
 			</image>
 			<item>
 				<title><![CDATA[Dummy Title]]></title>
-				<link>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</link>
-				<guid>https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</guid>
+				<link>https://domain.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</link>
+				<guid>https://domain.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona</guid>
 				<pubDate>Sun, 15 Mar 2020 18:34:46 +0700</pubDate>
 				<description>&lt;img src=&quot;https://dummy.jpeg&quot; align=&quot;left&quot; hspace=&quot;7&quot; width=&quot;100&quot; /&gt;<![CDATA["Dummy description"]]></description>
 				<enclosure url="https://dummy.png" length="10240" type="image/png" />
@@ -136,14 +136,14 @@ func fakeOkezoneServer(w http.ResponseWriter, r *http.Request) {
 		xmlns:media="http://search.yahoo.com/mrss/"
 		xmlns:atom="http://www.w3.org/2005/Atom">
 		<channel>
-			<title>Sindikasi news.okezone.com</title>
+			<title>Sindikasi domain.okezone.com</title>
 			<description>Berita-berita Okezone pada kanal News</description>
-			<link>https://news.okezone.com</link>
+			<link>https://domain.okezone.com</link>
 			<lastBuildDate>Mon, 16 Mar 2020 13:53:26 +0700</lastBuildDate>
 			<generator>Okezone RSS 2.0 Generator</generator>
 			<image>
-				<link>https://news.okezone.com</link>
-				<title>Sindikasi news.okezone.com</title>
+				<link>https://domain.okezone.com</link>
+				<title>Sindikasi domain.okezone.com</title>
 				<url>https://cdn.okezone.com/underwood/revamp/2019/logo/desktop/icon-okz.png</url>
 				<description>Berita-berita Okezone pada kanal News</description>
 			</image>
@@ -154,7 +154,7 @@ func fakeOkezoneServer(w http.ResponseWriter, r *http.Request) {
 				<description>Dummy description</description>
 				<media:content url="https://dummy.jpg?w=300" 
 										type="image/jpg" expression="full" width="300" height="190"></media:content>
-				<category>breaking news - Property</category>
+				<category>breaking domain - Property</category>
 				<pubDate>Mon, 16 Mar 2020 13:53:18 +0700</pubDate>
 			</item>
 			<atom:link href="https://sindikasi.okezone.com/index.php/rss/0/RSS2.0" rel="self" type="application/rss+xml" />
@@ -227,20 +227,20 @@ func TestBBCNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeBBCServer))
 	defer server.Close()
 
-	expectedResult := []news.News{
-		news.News{
+	expectedResult := []entity.News{
+		entity.News{
 			Title:       "Virus corona: Mengapa Indonesia 'tidak terbuka', sementara negara lain bersikap 'transparan'?",
 			Url:         "http://www.bbc.com/indonesia/indonesia-51842758",
 			Description: "Dummy description",
 			PubDate:     1583988023,
 		},
-		news.News{
+		entity.News{
 			Title:       "Sejarah bulu tangkis di Olimpiade: Mengapa Indonesia sulit lahirkan Susy Susanti generasi baru?",
 			Url:         "http://www.bbc.com/indonesia/olahraga-51662063",
 			Description: "Dummy description",
 			PubDate:     1583980941,
 		},
-		news.News{
+		entity.News{
 			Title:       "Virus corona: Karyawan apresiasi pembebasan pajak penghasilan, ekonom sebut 'perlu stimulus fiskal dan moneter' atasi perlambatan ekonomi",
 			Url:         "http://www.bbc.com/indonesia/indonesia-51830029",
 			Description: "Dummy description",
@@ -262,22 +262,22 @@ func TestAntaraNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeAntaraServer))
 	defer server.Close()
 
-	expectedResult := []news.News{
-		news.News{
+	expectedResult := []entity.News{
+		entity.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/berita/1357722/surabaya-belum-perlu-lockdown-antisipasi-covid-19-sebut-wali-kota",
 			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
 			PubDate:      1584262264,
 		},
-		news.News{
+		entity.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/foto/1357714/pencegahan-wabah-covid-19-di-kalimantan-tengah",
 			MediaContent: "https://dummy.jpg",
 			Description:  "Dummy description",
 			PubDate:      1584262264,
 		},
-		news.News{
+		entity.News{
 			Title:        "Dummy Title",
 			Url:          "https://www.antaranews.com/video/1357690/presiden-imbau-masyarakat-bekerja-belajar-dan-beribadah-di-rumah",
 			MediaContent: "https://dummy.jpg",
@@ -301,10 +301,10 @@ func TestDetikNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeDetikServer))
 	defer server.Close()
 
-	expectedResult := []news.News{
-		news.News{
+	expectedResult := []entity.News{
+		entity.News{
 			Title:        "Dummy Title",
-			Url:          "https://news.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
+			Url:          "https://domain.detik.com/read/2020/03/15/182444/4940126/10/belajar-mengajar-tk-sampai-smp-di-kendari-pindah-ke-rumah-imbas-corona",
 			MediaContent: "https://dummy.jpeg",
 			Description:  "\"Dummy description\"",
 			PubDate:      1584272086,
@@ -326,8 +326,8 @@ func TestOkezoneNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeOkezoneServer))
 	defer server.Close()
 
-	expectedResult := []news.News{
-		news.News{
+	expectedResult := []entity.News{
+		entity.News{
 			Title:        "Dummy Title",
 			Url:          "https://megapolitan.okezone.com/read/2020/03/16/338/2184032/cegah-penyebaran-covid-19-pemkab-bekasi-tiadakan-kegiatan-publik",
 			MediaContent: "https://dummy.jpg?w=300",
@@ -350,8 +350,8 @@ func TestRepublikaNewsFetcher(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(fakeRepublikaServer))
 	defer server.Close()
 
-	expectedResult := []news.News{
-		news.News{
+	expectedResult := []entity.News{
+		entity.News{
 			Title:        "Dummy Title",
 			Url:          "https://republika.co.id/berita/q79zht354/politikus-senior-yakin-amien-rais-tak-bentuk-pan-reformasi",
 			MediaContent: "https://dummy.jpg",
@@ -370,7 +370,7 @@ func TestRepublikaNewsFetcher(t *testing.T) {
 	assertElements(t, expectedResult, data)
 }
 
-func assertLength(t *testing.T, expected []news.News, got []news.News) {
+func assertLength(t *testing.T, expected []entity.News, got []entity.News) {
 	t.Helper()
 
 	if len(expected) != len(got) {
@@ -378,7 +378,7 @@ func assertLength(t *testing.T, expected []news.News, got []news.News) {
 	}
 }
 
-func assertElements(t *testing.T, expected []news.News, got []news.News) {
+func assertElements(t *testing.T, expected []entity.News, got []entity.News) {
 	t.Helper()
 	for index, val := range expected {
 		if val.Title != got[index].Title {

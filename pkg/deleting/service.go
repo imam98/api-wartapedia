@@ -1,7 +1,7 @@
 package deleting
 
 import (
-	"github.com/imam98/api-wartapedia/pkg/news"
+	"github.com/imam98/api-wartapedia/pkg/domain"
 	"github.com/rs/zerolog"
 	"os"
 	"time"
@@ -16,7 +16,7 @@ type service struct {
 }
 
 func NewService(repo Repository) *service {
-	return &service{repo:repo}
+	return &service{repo: repo}
 }
 
 func (s *service) Start() error {
@@ -31,7 +31,7 @@ func (s *service) Start() error {
 		logger.Info().Msg("Start delete operation")
 		err := s.repo.DeleteExpiredIndex()
 		if err != nil {
-			if err == news.ErrItemNotFound {
+			if err == domain.ErrItemNotFound {
 				logger.Error().Msg("Index not found exception")
 			} else {
 				return err
