@@ -107,8 +107,10 @@ func parseMediaContent(val *newsResult) error {
 	}
 
 	subs := re.FindStringSubmatch(val.Description)
-	val.MediaContent.Src = subs[1]
-	val.Description = re.ReplaceAllString(val.Description, "")
+	if len(subs) > 0 {
+		val.MediaContent.Src = subs[1]
+		val.Description = re.ReplaceAllString(val.Description, "")
+	}
 
 	return nil
 }
